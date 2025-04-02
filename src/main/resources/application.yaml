@@ -1,0 +1,23 @@
+spring.application.name: TelegramBot
+
+bot:
+  name: ${BOT_NAME:***}
+  token: ${BOT_TOKEN:***}
+  chat:
+    limit: 3000
+
+spring:
+  datasource:
+    url: ${DB_URL:***}
+    username: ${DB_USERNAME:***}
+    password: ${DB_PASSWORD:***}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+logging:
+  file:
+    name: logs/app.log
+  level:
+    root: info
