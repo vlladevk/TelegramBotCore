@@ -2,7 +2,7 @@ package org.pl.pcz.yevkov.tgbottest.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.pl.pcz.yevkov.tgbottest.application.CommandRegistry;
+import org.pl.pcz.yevkov.tgbottest.application.CommandCatalog;
 import org.pl.pcz.yevkov.tgbottest.application.BotApiAdapter;
 import org.pl.pcz.yevkov.tgbottest.application.model.RegisteredCommand;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -20,14 +20,14 @@ import java.util.List;
 @Slf4j
 public class CommandRegistrar {
     private final BotApiAdapter telegramBot;
-    private final CommandRegistry commandRegistry;
+    private final CommandCatalog commandCatalog;
 
     @EventListener
     public void onApplicationReady(ContextRefreshedEvent ignore) {
         try {
-            log.info("Registering {} Telegram commands...", commandRegistry.getAllRegisteredCommands()
+            log.info("Registering {} Telegram commands...", commandCatalog.getAllRegisteredCommands()
                     .stream().filter(RegisteredCommand::showInMenu).count());
-            List<BotCommand> commands = commandRegistry.getAllRegisteredCommands().stream()
+            List<BotCommand> commands = commandCatalog.getAllRegisteredCommands().stream()
                     .filter(RegisteredCommand::showInMenu)
                     .map(cmd -> new BotCommand(cmd.name(), cmd.description()))
                     .toList();

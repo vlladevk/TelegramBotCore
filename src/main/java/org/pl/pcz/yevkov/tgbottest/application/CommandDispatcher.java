@@ -17,7 +17,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class CommandDispatcher {
-    private final CommandRegistry commandRegistry;
+    private final CommandCatalog commandCatalog;
     private final CommandAccessManager commandAccessManager;
     private final UpdateHelper updateHelper;
 
@@ -31,7 +31,7 @@ public class CommandDispatcher {
 
         log.info("Received command: '{}' from userId={} in chatId={}", command, userId, chatId);
 
-        var registeredCommandOptional = commandRegistry.getRegisteredCommand(command);
+        var registeredCommandOptional = commandCatalog.getRegisteredCommand(command);
 
         if (registeredCommandOptional.isEmpty()) {
             log.debug("Unknown command received: {} from userId={} in chatId={}", command, userId, chatId);
@@ -63,7 +63,7 @@ public class CommandDispatcher {
 
     public boolean isCommandAllowed(@NonNull Update update) {
         String command = extractCommand(update);
-        return commandRegistry.getRegisteredCommand(command).isPresent();
+        return commandCatalog.getRegisteredCommand(command).isPresent();
     }
 
     private boolean hasText(@NonNull Update update) {

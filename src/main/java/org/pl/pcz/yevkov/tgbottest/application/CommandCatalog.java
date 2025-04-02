@@ -1,15 +1,12 @@
 package org.pl.pcz.yevkov.tgbottest.application;
 
-import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.pl.pcz.yevkov.tgbottest.annotation.BotCommand;
-import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
 import org.pl.pcz.yevkov.tgbottest.application.model.RegisteredCommand;
 import org.pl.pcz.yevkov.tgbottest.entity.UserRole;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -20,22 +17,18 @@ import java.util.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-    public class CommandRegistry {
-
-    private final ApplicationContext applicationContext;
-
+public class CommandCatalog implements CommandScanner {
     private final Map<String, RegisteredCommand> commandMap = new LinkedHashMap<>();
 
-
-    /** Scans @CommandController for methods annotated with @BotCommand,
-     *  validates method signatures (must take Update and return void or SendMessage),
-     *  and registers them by command name. Throws an exception on duplicates or invalid methods.
-    **/
-    @PostConstruct
-    public void init() {
-        var beans = applicationContext.getBeansWithAnnotation(CommandController.class);
-        var commandControllers = beans.values();
-        commandControllers.forEach(this::registerCommandController);
+    @Override
+    public void registerCommand(@NonNull Object handler, @NonNull Method method) {
+        validateCommandMethod(method);
+        RegisteredCommand command = toRegisteredCommand(handler, method);
+        if (commandMap.containsKey(command.name())) {
+            throw new IllegalStateException("Command duplication: " + command.name());
+        }
+        commandMap.put(command.name(), command);
+        log.debug("Registered command: {}", command.name());
     }
 
     public Collection<RegisteredCommand> getAllRegisteredCommands() {
@@ -47,23 +40,6 @@ import java.util.*;
         return  Optional.ofNullable(registeredCommand);
     }
 
-
-    public void registerCommandController(Object controller) {
-        for (Method method : controller.getClass().getDeclaredMethods()) {
-            if (!method.isAnnotationPresent(BotCommand.class)) continue;
-
-            validateCommandMethod(method);
-
-            RegisteredCommand command = toRegisteredCommand(controller, method);
-
-            if (commandMap.containsKey(command.name())) {
-                throw new IllegalStateException("Command duplication: " + command.name());
-            }
-
-            commandMap.put(command.name(), command);
-            log.debug("Registered command: {}", command.name());
-        }
-    }
 
     private void validateCommandMethod(@NonNull Method method) {
         if (method.getParameterCount() != 1 || !Update.class.equals(method.getParameterTypes()[0])) {

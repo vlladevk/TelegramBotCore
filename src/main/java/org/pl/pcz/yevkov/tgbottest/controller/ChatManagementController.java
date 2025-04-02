@@ -21,10 +21,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.List;
 import java.util.Optional;
 
-
-@RequiredArgsConstructor
 @Slf4j
 @CommandController
+@RequiredArgsConstructor
 public class ChatManagementController {
     private final ChatService chatService;
     private final UserService userService;
