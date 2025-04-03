@@ -1,7 +1,7 @@
 package org.pl.pcz.yevkov.tgbottest.application.helper;
 
 import lombok.NonNull;
-import org.pl.pcz.yevkov.tgbottest.application.BotApiAdapter;
+import org.pl.pcz.yevkov.tgbottest.bot.adapter.BotApiAdapter;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;

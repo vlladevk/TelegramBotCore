@@ -2,11 +2,16 @@ package org.pl.pcz.yevkov.tgbottest.listener;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.pl.pcz.yevkov.tgbottest.application.BotApiAdapter;
-import org.pl.pcz.yevkov.tgbottest.application.CommandDispatcher;
+import lombok.extern.log4j.Log4j2;
+import org.pl.pcz.yevkov.tgbottest.bot.adapter.BotApiAdapter;
+import org.pl.pcz.yevkov.tgbottest.application.command.dispatcher.CommandDispatcher;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
-import org.pl.pcz.yevkov.tgbottest.dto.*;
+import org.pl.pcz.yevkov.tgbottest.dto.chat.ChatCreateDto;
+import org.pl.pcz.yevkov.tgbottest.dto.chat.ChatReadDto;
+import org.pl.pcz.yevkov.tgbottest.dto.user.UserCreateDto;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatCreateDto;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatUpdateDto;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatStatus;
 import org.pl.pcz.yevkov.tgbottest.entity.UserRole;
 import org.pl.pcz.yevkov.tgbottest.event.TelegramUpdateEvent;
@@ -26,7 +31,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 public class TelegramUpdateListener {
     private final CommandDispatcher dispatcher;
     private final BotApiAdapter telegramBot;

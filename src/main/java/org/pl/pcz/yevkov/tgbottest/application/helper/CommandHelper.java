@@ -3,7 +3,7 @@ package org.pl.pcz.yevkov.tgbottest.application.helper;
 import lombok.NonNull;
 
 import lombok.RequiredArgsConstructor;
-import org.pl.pcz.yevkov.tgbottest.dto.UserChatReadDto;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
 import org.pl.pcz.yevkov.tgbottest.service.UserChatService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

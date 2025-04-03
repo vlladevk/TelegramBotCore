@@ -1,13 +1,13 @@
 package org.pl.pcz.yevkov.tgbottest.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.pl.pcz.yevkov.tgbottest.dto.ChatCreateDto;
-import org.pl.pcz.yevkov.tgbottest.dto.ChatReadDto;
+import lombok.extern.log4j.Log4j2;
+import org.pl.pcz.yevkov.tgbottest.dto.chat.ChatCreateDto;
+import org.pl.pcz.yevkov.tgbottest.dto.chat.ChatReadDto;
 import org.pl.pcz.yevkov.tgbottest.entity.Chat;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatStatus;
-import org.pl.pcz.yevkov.tgbottest.mapper.ChatCreateMapper;
-import org.pl.pcz.yevkov.tgbottest.mapper.ChatReadMapper;
+import org.pl.pcz.yevkov.tgbottest.mapper.chat.ChatCreateMapper;
+import org.pl.pcz.yevkov.tgbottest.mapper.chat.ChatReadMapper;
 import org.pl.pcz.yevkov.tgbottest.repository.ChatRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 
-@Slf4j
+@Log4j2
 @Service
 @RequiredArgsConstructor
 @Transactional

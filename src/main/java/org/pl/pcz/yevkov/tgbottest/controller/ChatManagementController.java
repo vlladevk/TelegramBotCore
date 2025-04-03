@@ -2,12 +2,16 @@ package org.pl.pcz.yevkov.tgbottest.controller;
 
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.pl.pcz.yevkov.tgbottest.annotation.BotCommand;
 import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
-import org.pl.pcz.yevkov.tgbottest.application.BotApiAdapter;
+import org.pl.pcz.yevkov.tgbottest.bot.adapter.BotApiAdapter;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
-import org.pl.pcz.yevkov.tgbottest.dto.*;
+import org.pl.pcz.yevkov.tgbottest.dto.chat.ChatReadDto;
+import org.pl.pcz.yevkov.tgbottest.dto.user.UserCreateDto;
+import org.pl.pcz.yevkov.tgbottest.dto.user.UserReadDto;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatCreateDto;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatStatus;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
 import org.pl.pcz.yevkov.tgbottest.entity.UserRole;
@@ -21,7 +25,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
+@Log4j2
 @CommandController
 @RequiredArgsConstructor
 public class ChatManagementController {

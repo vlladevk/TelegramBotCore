@@ -2,18 +2,18 @@ package org.pl.pcz.yevkov.tgbottest.service;
 
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.pl.pcz.yevkov.tgbottest.dto.UserCreateDto;
-import org.pl.pcz.yevkov.tgbottest.dto.UserReadDto;
-import org.pl.pcz.yevkov.tgbottest.mapper.UserCreateMapper;
-import org.pl.pcz.yevkov.tgbottest.mapper.UserReadMapper;
+import lombok.extern.log4j.Log4j2;
+import org.pl.pcz.yevkov.tgbottest.dto.user.UserCreateDto;
+import org.pl.pcz.yevkov.tgbottest.dto.user.UserReadDto;
+import org.pl.pcz.yevkov.tgbottest.mapper.user.UserCreateMapper;
+import org.pl.pcz.yevkov.tgbottest.mapper.user.UserReadMapper;
 import org.pl.pcz.yevkov.tgbottest.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Slf4j
+@Log4j2
 @Service
 @RequiredArgsConstructor
 @Transactional

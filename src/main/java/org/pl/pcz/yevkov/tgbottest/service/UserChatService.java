@@ -1,15 +1,15 @@
 package org.pl.pcz.yevkov.tgbottest.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.pl.pcz.yevkov.tgbottest.dto.UserChatCreateDto;
-import org.pl.pcz.yevkov.tgbottest.dto.UserChatReadDto;
-import org.pl.pcz.yevkov.tgbottest.dto.UserChatUpdateDto;
+import lombok.extern.log4j.Log4j2;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatCreateDto;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatUpdateDto;
 import org.pl.pcz.yevkov.tgbottest.entity.UserRole;
 import org.pl.pcz.yevkov.tgbottest.entity.UserChat;
-import org.pl.pcz.yevkov.tgbottest.mapper.UserChatCreateMapper;
-import org.pl.pcz.yevkov.tgbottest.mapper.UserChatReadMapper;
-import org.pl.pcz.yevkov.tgbottest.mapper.UserChatUpdateMapper;
+import org.pl.pcz.yevkov.tgbottest.mapper.userChat.UserChatCreateMapper;
+import org.pl.pcz.yevkov.tgbottest.mapper.userChat.UserChatReadMapper;
+import org.pl.pcz.yevkov.tgbottest.mapper.userChat.UserChatUpdateMapper;
 import org.pl.pcz.yevkov.tgbottest.repository.UserChatRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
+@Log4j2
 @Service
 @Transactional
 @RequiredArgsConstructor

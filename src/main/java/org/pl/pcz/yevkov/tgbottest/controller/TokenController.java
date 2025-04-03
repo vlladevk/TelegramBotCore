@@ -7,8 +7,8 @@ import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
 import org.pl.pcz.yevkov.tgbottest.application.helper.CommandHelper;
 
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
-import org.pl.pcz.yevkov.tgbottest.dto.UserChatReadDto;
-import org.pl.pcz.yevkov.tgbottest.dto.UserChatUpdateDto;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
+import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatUpdateDto;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
 import org.pl.pcz.yevkov.tgbottest.entity.UserRole;
 import org.pl.pcz.yevkov.tgbottest.service.UserChatService;

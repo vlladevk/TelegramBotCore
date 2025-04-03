@@ -2,7 +2,7 @@ package org.pl.pcz.yevkov.tgbottest.configuration;
 
 
 import lombok.NonNull;
-import org.pl.pcz.yevkov.tgbottest.bot.TelegramBot;
+import org.pl.pcz.yevkov.tgbottest.bot.core.TelegramBot;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

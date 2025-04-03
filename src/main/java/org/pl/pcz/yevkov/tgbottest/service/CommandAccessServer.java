@@ -2,9 +2,9 @@ package org.pl.pcz.yevkov.tgbottest.service;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.pl.pcz.yevkov.tgbottest.application.CommandAccessManager;
-import org.pl.pcz.yevkov.tgbottest.application.model.CommandAccessResult;
-import org.pl.pcz.yevkov.tgbottest.application.model.RegisteredCommand;
+import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandPermissionChecker;
+import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandAccessResult;
+import org.pl.pcz.yevkov.tgbottest.application.command.registry.RegisteredCommand;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CommandAccessServer implements CommandAccessManager {
+public class CommandAccessServer implements CommandPermissionChecker {
     private final UserChatService userChatService;
     private final UpdateHelper updateHelper;
 
