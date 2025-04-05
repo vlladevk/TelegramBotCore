@@ -10,6 +10,8 @@ import org.pl.pcz.yevkov.tgbottest.entity.UserChat;
 import org.pl.pcz.yevkov.tgbottest.mapper.userChat.UserChatCreateMapper;
 import org.pl.pcz.yevkov.tgbottest.mapper.userChat.UserChatReadMapper;
 import org.pl.pcz.yevkov.tgbottest.mapper.userChat.UserChatUpdateMapper;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.pl.pcz.yevkov.tgbottest.repository.UserChatRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +39,8 @@ public class UserChatService {
         return userChatRepository.findAll().stream().map(userChatReadMapper::mapFrom).toList();
     }
 
-    public Optional<UserChatReadDto> getUserChatBy(Long chatId, Long userId) {
-        var userChatOptional = userChatRepository.findUserChatByChatIdAndUserId(chatId, userId);
+    public Optional<UserChatReadDto> getUserChatBy(ChatId chatId, UserId userId) {
+        var userChatOptional = userChatRepository.findUserChatByChatIdAndUserId(chatId.value(), userId.value());
         if (userChatOptional.isPresent()) {
             log.debug("UserChat found for chatId={}, userId={}", chatId, userId);
         } else {
@@ -47,8 +49,9 @@ public class UserChatService {
         return userChatOptional.map(userChatReadMapper::mapFrom);
     }
 
-    public void updateChatStatus(Long chatId, Long userId, UserRole userRole) {
-        var userChatOptional = userChatRepository.findUserChatByChatIdAndUserId(chatId, userId);
+    public void updateChatStatus(ChatId chatId, UserId userId, UserRole userRole) {
+        var userChatOptional = userChatRepository
+                .findUserChatByChatIdAndUserId(chatId.value(), userId.value());
         if (userChatOptional.isPresent()) {
             var userChat = userChatOptional.get();
             userChat.setUserRole(userRole);
@@ -68,21 +71,21 @@ public class UserChatService {
         }
     }
 
-    public List<UserChatReadDto> getUserChatsByFirstName(Long chatId, String firstName) {
-        List<UserChat> userChat = userChatRepository.findAllByUserNameAndChatId(firstName, chatId);
+    public List<UserChatReadDto> getUserChatsByFirstName(ChatId chatId, String firstName) {
+        List<UserChat> userChat = userChatRepository.findAllByUserNameAndChatId(firstName, chatId.value());
         return userChat.stream().map(userChatReadMapper::mapFrom).toList();
     }
 
-    public List<UserChatReadDto> getUserChatsByChatId(Long chatId) {
-        var userChats = userChatRepository.findAllByChatId(chatId);
+    public List<UserChatReadDto> getUserChatsByChatId(ChatId chatId) {
+        var userChats = userChatRepository.findAllByChatId(chatId.value());
         log.debug("Fetched {} user chats for chatId={}", userChats.size(), chatId);
         return userChats.stream()
                 .map(userChatReadMapper::mapFrom)
                 .toList();
     }
 
-    public Optional<UserChatReadDto> getUserChatByUserName(Long chatId, String username) {
-        Optional<UserChat> userChat = userChatRepository.findUserChatByUserUserNameAndChatId(username, chatId);
+    public Optional<UserChatReadDto> getUserChatByUserName(ChatId chatId, String username) {
+        Optional<UserChat> userChat = userChatRepository.findUserChatByUserUserNameAndChatId(username, chatId.value());
         return userChat.map(userChatReadMapper::mapFrom);
     }
 }

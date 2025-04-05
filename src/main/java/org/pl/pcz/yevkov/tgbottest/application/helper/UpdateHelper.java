@@ -2,8 +2,9 @@ package org.pl.pcz.yevkov.tgbottest.application.helper;
 
 import lombok.NonNull;
 import org.pl.pcz.yevkov.tgbottest.bot.adapter.BotApiAdapter;
-import org.pl.pcz.yevkov.tgbottest.dto.event.ChatId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
+import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -47,11 +48,10 @@ public class UpdateHelper {
         botApiAdapter.execute(new DeleteMessage(chatId.value().toString(), messageId));
     }
 
-    public boolean isUserAdmin(@NonNull Long chatId, @NonNull Long userId, @NonNull BotApiAdapter telegramApi)
-            throws TelegramApiException {
+    public boolean isUserAdmin(@NonNull ChatId chatId, @NonNull UserId userId, @NonNull BotApiAdapter telegramApi) throws TelegramApiException {
         GetChatMember getChatMember = new GetChatMember();
-        getChatMember.setChatId(chatId.toString());
-        getChatMember.setUserId(userId);
+        getChatMember.setChatId(chatId.value().toString());
+        getChatMember.setUserId(userId.value());
 
         ChatMember member = telegramApi.execute(getChatMember);
 

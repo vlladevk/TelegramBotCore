@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
 import org.pl.pcz.yevkov.tgbottest.service.UserChatService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -18,7 +19,7 @@ public class UserResolver {
 
     public Optional<UserChatReadDto> resolveUserByNameOrUsername(
             @NonNull UserChatService userChatService,
-            @NonNull Long chatId,
+            @NonNull ChatId chatId,
             @NonNull String input
     ) {
         String trimmed = input.trim();
@@ -31,11 +32,11 @@ public class UserResolver {
         return input.startsWith("@");
     }
 
-    private Optional<UserChatReadDto> findByUsername(UserChatService service, Long chatId, String username) {
+    private Optional<UserChatReadDto> findByUsername(UserChatService service, ChatId chatId, String username) {
         return service.getUserChatByUserName(chatId, username.substring(1));
     }
 
-    private Optional<UserChatReadDto> findByFirstName(UserChatService service, Long chatId, String firstName) {
+    private Optional<UserChatReadDto> findByFirstName(UserChatService service, ChatId chatId, String firstName) {
         List<UserChatReadDto> matches = service.getUserChatsByFirstName(chatId, firstName);
         return matches.size() == 1 ? Optional.of(matches.getFirst()) : Optional.empty();
     }

@@ -16,7 +16,7 @@ public class ChatCreateMapper implements Mapper<ChatCreateDto, Chat> {
     @Override
     public Chat mapFrom(@NonNull ChatCreateDto object) {
         return Chat.builder()
-                .id(object.id())
+                .id(object.id().value())
                 .title(object.title())
                 .chatStatus(ChatStatus.INACTIVE)
                 .hourLimit(hourLimit)

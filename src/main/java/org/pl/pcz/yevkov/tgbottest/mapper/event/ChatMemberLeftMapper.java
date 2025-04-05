@@ -1,9 +1,9 @@
 package org.pl.pcz.yevkov.tgbottest.mapper.event;
 
 import lombok.NonNull;
-import org.pl.pcz.yevkov.tgbottest.dto.event.ChatId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMemberLeftDto;
-import org.pl.pcz.yevkov.tgbottest.dto.event.UserId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;

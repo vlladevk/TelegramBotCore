@@ -8,9 +8,9 @@ import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
 import org.pl.pcz.yevkov.tgbottest.bot.adapter.BotApiAdapter;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
 import org.pl.pcz.yevkov.tgbottest.dto.chat.ChatReadDto;
-import org.pl.pcz.yevkov.tgbottest.dto.event.ChatId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.tgbottest.dto.event.UserId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.pl.pcz.yevkov.tgbottest.dto.user.UserCreateDto;
 import org.pl.pcz.yevkov.tgbottest.dto.user.UserReadDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatCreateDto;
@@ -48,7 +48,7 @@ public class ChatManagementController {
     public SendMessage registerChat(ChatMessageReceivedDto receivedMessage) {
         ChatId chatId = receivedMessage.chatId();
         UserId userId = receivedMessage.userId();
-        var chatOpt = chatService.findChatById(chatId.value());
+        var chatOpt = chatService.findChatById(chatId);
 
         if (chatOpt.isEmpty()) {
             return updateHelper.generateMessage(receivedMessage, "Chat not found. Add the bot to the group first.");
@@ -60,12 +60,12 @@ public class ChatManagementController {
         List<String> args = updateHelper.extractArguments(receivedMessage.text());
         if (!args.isEmpty()) {
             Long hourLimit = Long.parseLong(args.getFirst());
-            chat = chatService.changeLimit(chatId.value(), hourLimit).orElseThrow(
+            chat = chatService.changeLimit(chatId, hourLimit).orElseThrow(
                     () -> new IllegalStateException("Cannot change limit of chat. Chat don't found" + chatId));
         }
 
         return switch (chat.chatStatus()) {
-            case INACTIVE -> handleInactiveChat(receivedMessage, chat, chatId.value(), userId.value());
+            case INACTIVE -> handleInactiveChat(receivedMessage, chat, chatId, userId);
             case ACTIVE -> {
                 log.debug("registrationChat: chat is already active: {}", chat);
                 yield updateHelper.generateMessage(receivedMessage, "Chat is already active!");
@@ -93,7 +93,7 @@ public class ChatManagementController {
         ChatId chatId = receivedMessage.chatId();
         UserId userId = receivedMessage.userId();
 
-        Optional<ChatReadDto> chatOpt = chatService.findChatById(chatId.value());
+        Optional<ChatReadDto> chatOpt = chatService.findChatById(chatId);
         if (chatOpt.isEmpty()) {
             return updateHelper.generateMessage(receivedMessage, "Chat not found.");
         }
@@ -105,12 +105,12 @@ public class ChatManagementController {
         }
 
         try {
-            boolean isAdmin = updateHelper.isUserAdmin(chatId.value(), userId.value(), bot);
+            boolean isAdmin = updateHelper.isUserAdmin(chatId, userId, bot);
             if (!isAdmin) {
                 return updateHelper.generateMessage(receivedMessage, "You don't have permission to deactivate this chat.");
             }
 
-            chatService.markChatAsStatus(chatId.value(), ChatStatus.INACTIVE);
+            chatService.markChatAsStatus(chatId, ChatStatus.INACTIVE);
             log.info("Chat {} marked as INACTIVE by user {}", chatId, userId);
             return updateHelper.generateMessage(receivedMessage, "Chat successfully marked as INACTIVE.");
         } catch (TelegramApiException e) {
@@ -119,7 +119,7 @@ public class ChatManagementController {
         }
     }
 
-    private SendMessage handleInactiveChat(ChatMessageReceivedDto receivedMessage, ChatReadDto chat, Long chatId, Long userId) {
+    private SendMessage handleInactiveChat(ChatMessageReceivedDto receivedMessage, ChatReadDto chat, ChatId chatId, UserId userId) {
         try {
             boolean isAdmin = updateHelper.isUserAdmin(chatId, userId, bot);
             if (isAdmin) {

@@ -7,9 +7,9 @@ import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UserResolver;
 
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
-import org.pl.pcz.yevkov.tgbottest.dto.event.ChatId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.tgbottest.dto.event.UserId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatUpdateDto;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
@@ -38,7 +38,7 @@ public class TokenController {
     public SendMessage remainingTokens(ChatMessageReceivedDto receivedMessage) {
         ChatId chatId = receivedMessage.chatId();
         UserId userId = receivedMessage.userId();
-        var userChatOptional = userChatService.getUserChatBy(chatId.value(), userId.value());
+        var userChatOptional = userChatService.getUserChatBy(chatId, userId);
         if (userChatOptional.isEmpty()) {
             throw new IllegalStateException("User chat not found. Add the bot to the group first.");
         }
@@ -63,7 +63,7 @@ public class TokenController {
         }
         ChatId chatId = receivedMessage.chatId();
         String input = arguments.getFirst();
-        Optional<UserChatReadDto> userOpt = userResolver.resolveUserByNameOrUsername(userChatService, chatId.value(), input);
+        Optional<UserChatReadDto> userOpt = userResolver.resolveUserByNameOrUsername(userChatService, chatId, input);
         if (userOpt.isEmpty()) return userResolver.handleUserNotFound(receivedMessage, input);
 
         Long countAdd = Long.parseLong(arguments.get(1));
@@ -95,7 +95,7 @@ public class TokenController {
             return updateHelper.generateMessage(receivedMessage, "Invalid number format. Example: /add_tokens_all 20");
         }
 
-        List<UserChatReadDto> allUsers = userChatService.getUserChatsByChatId(chatId.value());
+        List<UserChatReadDto> allUsers = userChatService.getUserChatsByChatId(chatId);
         if (allUsers.isEmpty()) {
             return updateHelper.generateMessage(receivedMessage, "No users found in this chat.");
         }
@@ -126,7 +126,7 @@ public class TokenController {
         if (!arguments.isEmpty()) {
             String input = arguments.getFirst();
 
-            Optional<UserChatReadDto> userOpt = userResolver.resolveUserByNameOrUsername(userChatService,chatId.value(), input);
+            Optional<UserChatReadDto> userOpt = userResolver.resolveUserByNameOrUsername(userChatService,chatId, input);
             if (userOpt.isEmpty()) return userResolver.handleUserNotFound(receivedMessage, input);
 
             UserChatReadDto userChat = userOpt.get();
@@ -134,7 +134,7 @@ public class TokenController {
             return updateHelper.generateMessage(receivedMessage, username + " has " + userChat.remainingTokens() + " token(s).");
         }
 
-        List<UserChatReadDto> allUsers = userChatService.getUserChatsByChatId(chatId.value());
+        List<UserChatReadDto> allUsers = userChatService.getUserChatsByChatId(chatId);
         if (allUsers.isEmpty()) {
             return updateHelper.generateMessage(receivedMessage, "No users found in this chat.");
         }

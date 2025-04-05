@@ -19,6 +19,8 @@ import org.pl.pcz.yevkov.tgbottest.entity.UserRole;
 import org.pl.pcz.yevkov.tgbottest.event.ChatMemberJoinedEvent;
 import org.pl.pcz.yevkov.tgbottest.event.ChatMemberLeftEvent;
 import org.pl.pcz.yevkov.tgbottest.event.ChatMessageReceivedEvent;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.pl.pcz.yevkov.tgbottest.service.ChatService;
 import org.pl.pcz.yevkov.tgbottest.service.UserChatService;
 import org.pl.pcz.yevkov.tgbottest.service.UserService;
@@ -70,12 +72,12 @@ public class TelegramUpdateListener {
             if (!isBotAddedToChat(chatMember)) return;
             ChatId chatId = chatMember.chatId();
             String chatName = chatMember.chatTitle();
-            Optional<ChatReadDto> readDto = chatService.findChatById(chatId.value());
+            Optional<ChatReadDto> readDto = chatService.findChatById(chatId);
             if (readDto.isPresent()) {
-                chatService.markChatAsStatus(chatId.value(), ChatStatus.INACTIVE);
+                chatService.markChatAsStatus(chatId, ChatStatus.INACTIVE);
                 log.info("Chat Status Updated on INACTIVE: {}", readDto);
             } else {
-                ChatCreateDto newChat = new ChatCreateDto(chatId.value(), chatName);
+                ChatCreateDto newChat = new ChatCreateDto(chatId, chatName);
                 chatService.createChat(newChat);
                 log.info("New chat created: {}", newChat);
             }
@@ -96,7 +98,7 @@ public class TelegramUpdateListener {
             Long botId = telegramBot.getBotId();
             if (botId.equals(memberLeftDto.userId().value())) {
                 ChatId chatId = memberLeftDto.chatId();
-                chatService.markChatAsStatus(chatId.value(), ChatStatus.DELETED);
+                chatService.markChatAsStatus(chatId, ChatStatus.DELETED);
                 log.info("Bot was removed from chat {}", chatId);
             }
         } catch (TelegramApiException e) {
@@ -132,7 +134,7 @@ public class TelegramUpdateListener {
         ChatId chatId = receivedMessage.chatId();
         UserId userId = receivedMessage.userId();
 
-        Optional<UserChatReadDto> userChatOpt = userChatService.getUserChatBy(chatId.value(), userId.value());
+        Optional<UserChatReadDto> userChatOpt = userChatService.getUserChatBy(chatId, userId);
         if (userChatOpt.isEmpty()) {
             log.error("UserChat not found for userId={} in chatId={}", userId, chatId);
             return;
@@ -176,18 +178,18 @@ public class TelegramUpdateListener {
         UserId userId = receivedMessage.userId();
         ChatId chatId = receivedMessage.chatId();
 
-        var chatOptional = chatService.findChatById(chatId.value());
+        var chatOptional = chatService.findChatById(chatId);
         if (chatOptional.isEmpty() || chatOptional.get().chatStatus() != ChatStatus.ACTIVE) return;
 
-        var userOptional = userService.findUserById(userId.value());
+        var userOptional = userService.findUserById(userId);
         if (userOptional.isEmpty()) {
-            registrationUser(userId.value(), receivedMessage.firstName(), receivedMessage.username());
-            registrationUserChat(chatId.value(), userId.value());
+            registrationUser(userId, receivedMessage.firstName(), receivedMessage.username());
+            registrationUserChat(chatId, userId);
             return;
         }
 
-        Optional<UserChatReadDto> userChatReadDto = userChatService.getUserChatBy(chatId.value(), userId.value());
-        if (userChatReadDto.isEmpty()) registrationUserChat(chatId.value(), userId.value());
+        Optional<UserChatReadDto> userChatReadDto = userChatService.getUserChatBy(chatId, userId);
+        if (userChatReadDto.isEmpty()) registrationUserChat(chatId, userId);
     }
 
     /**
@@ -209,7 +211,7 @@ public class TelegramUpdateListener {
     /**
      * Registers a new user in the database.
      */
-    private void registrationUser(@NonNull Long userId, @NonNull String firstName, String userName) {
+    private void registrationUser(@NonNull UserId userId, @NonNull String firstName, String userName) {
         UserCreateDto userCreateDto = new UserCreateDto(userId, firstName, userName);
         log.debug("Attempting to register user: {}", userCreateDto);
         try {
@@ -222,7 +224,7 @@ public class TelegramUpdateListener {
     /**
      * Registers a user-chat relation with default role USER.
      */
-    private void registrationUserChat(@NonNull Long chatId, @NonNull Long userId) {
+    private void registrationUserChat(@NonNull ChatId chatId, @NonNull UserId userId) {
         UserChatCreateDto userChatCreateDto = new UserChatCreateDto(
                 chatId, userId, UserRole.USER
         );

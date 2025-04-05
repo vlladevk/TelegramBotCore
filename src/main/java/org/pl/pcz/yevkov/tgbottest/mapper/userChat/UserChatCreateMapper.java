@@ -20,8 +20,8 @@ public class UserChatCreateMapper implements Mapper<UserChatCreateDto, UserChat>
 
     @Override
     public UserChat mapFrom(@NonNull UserChatCreateDto dto) {
-        User user = userRepository.findById(dto.userId()).orElseThrow(() -> new RuntimeException("User not found"));
-        Chat chat = chatRepository.findById(dto.chatId()).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(dto.userId().value()).orElseThrow(() -> new RuntimeException("User not found"));
+        Chat chat = chatRepository.findById(dto.chatId().value()).orElseThrow(() -> new RuntimeException("User not found"));
 
         return UserChat.builder()
                 .chat(chat)

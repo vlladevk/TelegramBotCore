@@ -8,9 +8,9 @@ import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandPermissionC
 import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandAccessResult;
 import org.pl.pcz.yevkov.tgbottest.application.command.registry.BotCommandProvider;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
-import org.pl.pcz.yevkov.tgbottest.dto.event.ChatId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.tgbottest.dto.event.UserId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 

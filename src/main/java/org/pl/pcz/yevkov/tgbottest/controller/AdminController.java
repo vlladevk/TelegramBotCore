@@ -6,7 +6,7 @@ import org.pl.pcz.yevkov.tgbottest.annotation.BotCommand;
 import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UserResolver;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
-import org.pl.pcz.yevkov.tgbottest.dto.event.ChatId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatUpdateDto;
@@ -42,7 +42,7 @@ public class AdminController {
         ChatId chatId = receivedMessage.chatId();
         String input = arguments.getFirst();
 
-        Optional<UserChatReadDto> userOpt = userResolver.resolveUserByNameOrUsername(userChatService, chatId.value(), input);
+        Optional<UserChatReadDto> userOpt = userResolver.resolveUserByNameOrUsername(userChatService, chatId, input);
         if (userOpt.isEmpty()) return userResolver.handleUserNotFound(receivedMessage, input);
 
         UserChatUpdateDto dto = new UserChatUpdateDto(null, UserRole.CHAT_ADMIN);
@@ -67,7 +67,7 @@ public class AdminController {
             return updateHelper.generateMessage(receivedMessage, "Invalid number of arguments. Expected: <userName> or <firstName>");
         }
         String input = arguments.getFirst();
-        Optional<UserChatReadDto> resolved = userResolver.resolveUserByNameOrUsername(userChatService, chatId.value(), input);
+        Optional<UserChatReadDto> resolved = userResolver.resolveUserByNameOrUsername(userChatService, chatId, input);
         if (resolved.isEmpty()) {
             return userResolver.handleUserNotFound(receivedMessage, input);
         }

@@ -7,6 +7,7 @@ import org.pl.pcz.yevkov.tgbottest.dto.user.UserCreateDto;
 import org.pl.pcz.yevkov.tgbottest.dto.user.UserReadDto;
 import org.pl.pcz.yevkov.tgbottest.mapper.user.UserCreateMapper;
 import org.pl.pcz.yevkov.tgbottest.mapper.user.UserReadMapper;
+import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.pl.pcz.yevkov.tgbottest.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +30,9 @@ public class UserService {
         log.info("Created User: id={}, userFirstName={} userName={}", saved.getId(), saved.getName(), saved.getUserName());
     }
 
-    public Optional<UserReadDto> findUserById(Long userId) {
+    public Optional<UserReadDto> findUserById(UserId userId) {
         log.debug("Searching for User with id={}", userId);
-        var userOptional = userRepository.findById(userId);
+        var userOptional = userRepository.findById(userId.value());
         if (userOptional.isPresent()) {
             log.debug("User found: id={}", userId);
         } else {

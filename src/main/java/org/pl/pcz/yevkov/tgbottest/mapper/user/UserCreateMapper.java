@@ -12,7 +12,7 @@ public class UserCreateMapper implements Mapper<UserCreateDto, User> {
     @Override
     public User mapFrom(@NonNull UserCreateDto object) {
         return User.builder()
-                .id(object.Id())
+                .id(object.Id().value())
                 .name(object.Name())
                 .userName(object.UserName())
                 .build();

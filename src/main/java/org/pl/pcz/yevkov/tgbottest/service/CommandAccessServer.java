@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandPermissionChecker;
 import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandAccessResult;
 import org.pl.pcz.yevkov.tgbottest.application.command.registry.RegisteredCommand;
-import org.pl.pcz.yevkov.tgbottest.dto.event.ChatId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.tgbottest.dto.event.UserId;
+import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public class CommandAccessServer implements CommandPermissionChecker {
         ChatId chatId = receivedMessage.chatId();
         UserId userId = receivedMessage.userId();
         if (chatType != ChatType.PRIVATE) {
-            var userChatReadDtoOptional = userChatService.getUserChatBy(chatId.value(), userId.value());
+            var userChatReadDtoOptional = userChatService.getUserChatBy(chatId, userId);
             if (userChatReadDtoOptional.isEmpty()) {
                 return new CommandAccessResult(true, "bot doesn't Active");
             }
