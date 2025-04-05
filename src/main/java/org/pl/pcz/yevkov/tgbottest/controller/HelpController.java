@@ -6,10 +6,9 @@ import org.pl.pcz.yevkov.tgbottest.annotation.BotCommand;
 import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
 import org.pl.pcz.yevkov.tgbottest.application.command.registry.BotCommandProvider;
 import org.pl.pcz.yevkov.tgbottest.application.command.registry.RegisteredCommand;
-import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
+import org.pl.pcz.yevkov.tgbottest.application.message.facrory.MessageDtoFactory;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-
+import org.pl.pcz.yevkov.tgbottest.dto.message.SendMessageDto;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -19,20 +18,23 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HelpController {
     private final BotCommandProvider botCommandProvider;
-    private final UpdateHelper updateHelper;
+    private final MessageDtoFactory messageFactory;
 
 
     @BotCommand(description = """
-            Lists all available bot commands.      \s
-            Показывает список всех доступных команд.
-            Usage: /help
-           \s""")
+             Lists all available bot commands.      \s
+             Показывает список всех доступных команд.
+             Usage: /help
+            \s""")
     @SuppressWarnings("unused")
-    public SendMessage help(ChatMessageReceivedDto receivedMessage) {
+    public SendMessageDto help(ChatMessageReceivedDto receivedMessage) {
         Collection<RegisteredCommand> commands = botCommandProvider.getAllRegisteredCommands();
 
         if (commands.isEmpty()) {
-            return updateHelper.generateMessage(receivedMessage, "No commands available.");
+            return messageFactory.generateMessage(
+                    receivedMessage,
+                    "No commands available."
+            );
         }
 
         int maxNameLength = commands.stream()
@@ -45,6 +47,9 @@ public class HelpController {
                 .map(cmd -> String.format("%-" + maxNameLength + "s — %s", cmd.name(), cmd.description()))
                 .collect(Collectors.joining("\n\n", "Available commands:\n\n", ""));
 
-        return updateHelper.generateMessage(receivedMessage, message);
+        return messageFactory.generateMessage(
+                receivedMessage,
+                message
+        );
     }
 }

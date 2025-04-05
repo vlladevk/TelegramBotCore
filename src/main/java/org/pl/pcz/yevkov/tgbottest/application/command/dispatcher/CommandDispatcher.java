@@ -3,16 +3,15 @@ package org.pl.pcz.yevkov.tgbottest.application.command.dispatcher;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
-import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandPermissionChecker;
 import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandAccessResult;
+import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandPermissionChecker;
 import org.pl.pcz.yevkov.tgbottest.application.command.registry.BotCommandProvider;
-import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
-import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
+import org.pl.pcz.yevkov.tgbottest.application.message.facrory.MessageDtoFactory;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
+import org.pl.pcz.yevkov.tgbottest.dto.message.SendMessageDto;
+import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
 import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.Optional;
 
@@ -23,12 +22,15 @@ import java.util.Optional;
 public class CommandDispatcher {
     private final BotCommandProvider botCommandProvider;
     private final CommandPermissionChecker commandPermissionChecker;
-    private final UpdateHelper updateHelper;
+    private final MessageDtoFactory messageDtoFactory;
 
-    public Optional<SendMessage> handle(@NonNull ChatMessageReceivedDto receivedMessage) {
+    public Optional<SendMessageDto> handle(@NonNull ChatMessageReceivedDto receivedMessage) {
         if (receivedMessage.text().isEmpty()) {
             log.debug("received text message is empty or null {}", receivedMessage);
-            return Optional.of(updateHelper.generateMessage(receivedMessage, "input message or text is Empty"));
+            var sendMessage = messageDtoFactory.generateMessage(
+                    receivedMessage,
+                    "input message or text is Empty");
+            return Optional.of(sendMessage);
         }
 
         ChatId chatId = receivedMessage.chatId();
@@ -41,7 +43,11 @@ public class CommandDispatcher {
 
         if (registeredCommandOptional.isEmpty()) {
             log.debug("Unknown command received: {} from {} in {}", command, userId, chatId);
-            return Optional.of( updateHelper.generateMessage(receivedMessage, "Unknown command: " + command));
+            var sendMessage = messageDtoFactory.generateMessage(
+                    receivedMessage,
+                    "Unknown command: " + command
+            );
+            return Optional.of(sendMessage);
         }
         try {
             var registeredCommand = registeredCommandOptional.get();
@@ -52,17 +58,26 @@ public class CommandDispatcher {
             if (!access.allowed()) {
                 log.debug("Command '{}' access denied by {} for userId={} in chatId={}",
                         command, access.reason(), userId, chatId);
-                return Optional.of(updateHelper.generateMessage(receivedMessage, access.reason()));
+                var sendMessage = messageDtoFactory.generateMessage(
+                        receivedMessage,
+                        access.reason()
+                );
+                return Optional.of(sendMessage);
             }
 
             log.info("Dispatching command: '{}' for userId={} in chatId={}", command, userId, chatId);
             // Can be null, if return methods type is void
             Object result = method.invoke(registeredCommand.handler(), receivedMessage);
-            return Optional.ofNullable((SendMessage) result);
+            return Optional.ofNullable((SendMessageDto) result);
         } catch (Exception e) {
             log.error("Error while processing command '{}' for userId={} in chatId={}: {}",
                     command, userId, chatId, e.getMessage(), e);
-            return Optional.of(updateHelper.generateMessage(receivedMessage, "Error while processing command: " + command + " Error: " + e.getMessage()));
+            var sendText = "Error while processing command: " + command + " Error: " + e.getMessage();
+            var sendMessage = messageDtoFactory.generateMessage(
+                    receivedMessage,
+                    sendText
+            );
+            return Optional.of(sendMessage);
         }
     }
 

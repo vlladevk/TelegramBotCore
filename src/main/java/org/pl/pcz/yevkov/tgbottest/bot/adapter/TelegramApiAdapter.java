@@ -4,10 +4,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.pl.pcz.yevkov.tgbottest.bot.core.TelegramBot;
+import org.pl.pcz.yevkov.tgbottest.dto.message.SendMessageDto;
+import org.pl.pcz.yevkov.tgbottest.mapper.message.SendMessageMapper;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -17,6 +18,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @RequiredArgsConstructor
 public class TelegramApiAdapter implements BotApiAdapter {
     private final TelegramBot telegramBot;
+    private final SendMessageMapper sendMessageMapper;
 
     @Override
     public Long getBotId() throws TelegramApiException {
@@ -25,10 +27,9 @@ public class TelegramApiAdapter implements BotApiAdapter {
     }
 
     @Override
-    public void execute(@NonNull SendMessage sendMessage) throws TelegramApiException {
-        log.debug("Sending message to chatId={}, text='{}'",
-                sendMessage.getChatId(), sendMessage.getText());
-        telegramBot.execute(sendMessage);
+    public void execute(@NonNull SendMessageDto sendMessage) throws TelegramApiException {
+        log.debug("Sending message to chatId={}, text='{}'", sendMessage.chatId(), sendMessage.text());
+        telegramBot.execute(sendMessageMapper.mapFrom(sendMessage));
     }
 
     @Override

@@ -3,12 +3,16 @@ package org.pl.pcz.yevkov.tgbottest.listener;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.pl.pcz.yevkov.tgbottest.bot.adapter.BotApiAdapter;
 import org.pl.pcz.yevkov.tgbottest.application.command.dispatcher.CommandDispatcher;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
+import org.pl.pcz.yevkov.tgbottest.application.message.facrory.MessageDtoFactory;
+import org.pl.pcz.yevkov.tgbottest.bot.adapter.BotApiAdapter;
 import org.pl.pcz.yevkov.tgbottest.dto.chat.ChatCreateDto;
 import org.pl.pcz.yevkov.tgbottest.dto.chat.ChatReadDto;
-import org.pl.pcz.yevkov.tgbottest.dto.event.*;
+import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMemberJoinedDto;
+import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMemberLeftDto;
+import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
+import org.pl.pcz.yevkov.tgbottest.dto.message.SendMessageDto;
 import org.pl.pcz.yevkov.tgbottest.dto.user.UserCreateDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatCreateDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
@@ -26,7 +30,6 @@ import org.pl.pcz.yevkov.tgbottest.service.UserChatService;
 import org.pl.pcz.yevkov.tgbottest.service.UserService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Optional;
@@ -41,6 +44,7 @@ public class TelegramUpdateListener {
     private final UserService userService;
     private final UserChatService userChatService;
     private final UpdateHelper updateHelper;
+    private final MessageDtoFactory messageFactory;
 
     /**
      * Main listener for Telegram updates.
@@ -66,7 +70,7 @@ public class TelegramUpdateListener {
      * Registers the chat or updates its status to INACTIVE.
      */
     @EventListener
-        public void onTelegramNewChat(ChatMemberJoinedEvent event) {
+    public void onTelegramNewChat(ChatMemberJoinedEvent event) {
         ChatMemberJoinedDto chatMember = event.member();
         try {
             if (!isBotAddedToChat(chatMember)) return;
@@ -111,11 +115,11 @@ public class TelegramUpdateListener {
      * Sends the response from the dispatcher if any.
      */
     private void onTelegramCommand(@NonNull ChatMessageReceivedDto receivedMessage) {
-        Optional<SendMessage> message = dispatcher.handle(receivedMessage);
+        Optional<SendMessageDto> message = dispatcher.handle(receivedMessage);
         if (message.isPresent()) {
-            SendMessage sendMessage = message.get();
+            var sendMessage = message.get();
             try {
-                 telegramBot.execute(sendMessage);
+                telegramBot.execute(sendMessage);
             } catch (TelegramApiException e) {
                 log.error(e.getMessage(), e);
             }
@@ -243,11 +247,15 @@ public class TelegramUpdateListener {
         String mention = (username != null) ? "@" + username : "User with ID " + userId.value();
 
         String warningMessage = """
-            ❌ %s has run out of tokens and their message was not sent.
-            To continue chatting, please ask an admin to recharge your tokens.
-            """.formatted(mention);
+                ❌ %s has run out of tokens and their message was not sent.
+                To continue chatting, please ask an admin to recharge your tokens.
+                """.formatted(mention);
 
-        SendMessage sendMessage =  updateHelper.generateMessage(receivedMessage, warningMessage);
+        var sendMessage = messageFactory.generateMessage(
+                receivedMessage,
+                warningMessage
+        );
+
         try {
             telegramBot.execute(sendMessage);
             log.info("Sent public token depletion warning for user {}", userId);

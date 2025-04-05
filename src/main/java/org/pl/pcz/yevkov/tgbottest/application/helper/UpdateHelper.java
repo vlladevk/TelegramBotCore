@@ -7,7 +7,6 @@ import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
 import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -17,20 +16,6 @@ import java.util.List;
 
 @Component
 public class UpdateHelper {
-    public SendMessage generateMessage(@NonNull ChatMessageReceivedDto receivedMessage) {
-        SendMessage message = new SendMessage();
-        message.setChatId(receivedMessage.chatId().value());
-        message.setMessageThreadId(receivedMessage.threadId().value());
-        return message;
-    }
-
-    public SendMessage generateMessage(@NonNull ChatMessageReceivedDto receivedMessage, @NonNull String message) {
-        var sendMessage = generateMessage(receivedMessage);
-        sendMessage.setText(message);
-        return sendMessage;
-    }
-
-
     public List<String> extractArguments(String text) {
         String[] parts = text.split("\\s+");
 
