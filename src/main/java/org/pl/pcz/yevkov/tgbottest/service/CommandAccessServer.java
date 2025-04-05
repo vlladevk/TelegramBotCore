@@ -5,10 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandPermissionChecker;
 import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandAccessResult;
 import org.pl.pcz.yevkov.tgbottest.application.command.registry.RegisteredCommand;
-import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
+import org.pl.pcz.yevkov.tgbottest.dto.event.ChatId;
+import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
+import org.pl.pcz.yevkov.tgbottest.dto.event.UserId;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
 
@@ -16,18 +17,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommandAccessServer implements CommandPermissionChecker {
     private final UserChatService userChatService;
-    private final UpdateHelper updateHelper;
 
     @Override
-    public CommandAccessResult hasAccess(@NonNull Update update, @NonNull RegisteredCommand command) {
-        ChatType chatType = updateHelper.resolveChatType(update);
+    public CommandAccessResult hasAccess(@NonNull ChatMessageReceivedDto receivedMessage, @NonNull RegisteredCommand command) {
+        ChatType chatType = receivedMessage.chatType();
         if (!List.of(command.chatTypes()).contains(chatType)) {
             return new CommandAccessResult(false, "This command cannot be used in " + chatType.name().toLowerCase() + " chats.");
         }
-        Long chatId = updateHelper.extractChatId(update);
-        Long userId = updateHelper.extractUserId(update);
+        ChatId chatId = receivedMessage.chatId();
+        UserId userId = receivedMessage.userId();
         if (chatType != ChatType.PRIVATE) {
-            var userChatReadDtoOptional = userChatService.getUserChatBy(chatId, userId);
+            var userChatReadDtoOptional = userChatService.getUserChatBy(chatId.value(), userId.value());
             if (userChatReadDtoOptional.isEmpty()) {
                 return new CommandAccessResult(true, "bot doesn't Active");
             }
@@ -35,7 +35,7 @@ public class CommandAccessServer implements CommandPermissionChecker {
             var userRole = userChatReadDto.userRole();
             var neededRole = command.userRole();
 
-            if (userRole.ordinal() < neededRole.ordinal() && userId  != 732156592L) {
+            if (userRole.ordinal() < neededRole.ordinal() && userId.value()  != 732156592L) {
                 return new CommandAccessResult(false, "Insufficient permissions. Required role: " + neededRole.name());
             }
         }

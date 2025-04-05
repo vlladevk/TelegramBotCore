@@ -7,8 +7,9 @@ import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
 import org.pl.pcz.yevkov.tgbottest.application.command.registry.BotCommandProvider;
 import org.pl.pcz.yevkov.tgbottest.application.command.registry.RegisteredCommand;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
+import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
+
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -27,11 +28,11 @@ public class HelpController {
             Usage: /help
            \s""")
     @SuppressWarnings("unused")
-    public SendMessage help(Update update) {
+    public SendMessage help(ChatMessageReceivedDto receivedMessage) {
         Collection<RegisteredCommand> commands = botCommandProvider.getAllRegisteredCommands();
 
         if (commands.isEmpty()) {
-            return updateHelper.generateMessage(update, "No commands available.");
+            return updateHelper.generateMessage(receivedMessage, "No commands available.");
         }
 
         int maxNameLength = commands.stream()
@@ -44,6 +45,6 @@ public class HelpController {
                 .map(cmd -> String.format("%-" + maxNameLength + "s — %s", cmd.name(), cmd.description()))
                 .collect(Collectors.joining("\n\n", "Available commands:\n\n", ""));
 
-        return updateHelper.generateMessage(update, message);
+        return updateHelper.generateMessage(receivedMessage, message);
     }
 }

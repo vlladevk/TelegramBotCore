@@ -24,7 +24,7 @@ public class Chat implements BaseEntity<Long> {
     private Long hourLimit;
 
     @Column(nullable = false)
-    //@Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private ChatStatus chatStatus;
 
     @OneToMany(mappedBy = "chat")

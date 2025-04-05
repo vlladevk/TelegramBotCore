@@ -3,11 +3,11 @@ package org.pl.pcz.yevkov.tgbottest.bot.core;
 import lombok.NonNull;
 
 import lombok.extern.log4j.Log4j2;
-import org.pl.pcz.yevkov.tgbottest.event.TelegramUpdateEvent;
+import org.pl.pcz.yevkov.tgbottest.application.event.dispatcher.BotEventDispatcher;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-
 
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -17,29 +17,35 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class TelegramBot extends TelegramLongPollingBot {
     private final BotProperties props;
     private final ApplicationEventPublisher publisher;
+    private final BotEventDispatcher botEventDispatcher;
 
-
-    public TelegramBot(@NonNull BotProperties props, @NonNull ApplicationEventPublisher publisher) {
+    public TelegramBot( @NonNull BotProperties props,
+                        @NonNull ApplicationEventPublisher publisher,
+                        @NonNull BotEventDispatcher botEventDispatcher) {
         super(props.token());
         this.props = props;
         this.publisher = publisher;
+        this.botEventDispatcher = botEventDispatcher;
         log.info("Telegram bot initialized: {}", props.name());
     }
 
+
     @Override
     public void onUpdateReceived(@NonNull Update update) {
-        log.debug("Received update: {}", update);
-        if (!update.hasMessage()) {
-            log.debug("Skipping update, because Massage has empty");
-            return;
+        log.info("Received update: {}", update);
+        try {
+           var events =  botEventDispatcher.handle(update);
+           for (var event : events) {
+               log.info("Event received: {}", event);
+           }
+           events.forEach(publisher::publishEvent);
+        } catch (Exception e) {
+            log.error("Unhandled exception while processing update: {}", update, e);
         }
-        publisher.publishEvent(new TelegramUpdateEvent(this, update));
     }
-
 
     @Override
     public String getBotUsername() {
         return props.name();
     }
-
 }

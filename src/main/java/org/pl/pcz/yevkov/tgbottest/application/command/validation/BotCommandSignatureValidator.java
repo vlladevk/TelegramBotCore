@@ -2,9 +2,9 @@ package org.pl.pcz.yevkov.tgbottest.application.command.validation;
 
 import lombok.NonNull;
 import org.pl.pcz.yevkov.tgbottest.annotation.BotCommand;
+import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.lang.reflect.Method;
 
@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
 public class BotCommandSignatureValidator implements CommandSignatureValidator {
     @Override
     public void validate(@NonNull Method method) {
-        if (method.getParameterCount() != 1 || !Update.class.equals(method.getParameterTypes()[0])) {
+        if (method.getParameterCount() != 1 || !ChatMessageReceivedDto.class.equals(method.getParameterTypes()[0])) {
             throw new IllegalStateException("@" + BotCommand.class.getSimpleName() + " method '" + method.getName() +
                     "' must have exactly one parameter of type Update");
         }

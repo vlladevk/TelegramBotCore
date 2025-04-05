@@ -4,16 +4,18 @@ package org.pl.pcz.yevkov.tgbottest.controller;
 import lombok.RequiredArgsConstructor;
 import org.pl.pcz.yevkov.tgbottest.annotation.BotCommand;
 import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
-import org.pl.pcz.yevkov.tgbottest.application.helper.CommandHelper;
+import org.pl.pcz.yevkov.tgbottest.application.helper.UserResolver;
 
 import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
+import org.pl.pcz.yevkov.tgbottest.dto.event.ChatId;
+import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
+import org.pl.pcz.yevkov.tgbottest.dto.event.UserId;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatUpdateDto;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
 import org.pl.pcz.yevkov.tgbottest.entity.UserRole;
 import org.pl.pcz.yevkov.tgbottest.service.UserChatService;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +25,7 @@ import java.util.Optional;
 public class TokenController {
     private final UserChatService userChatService;
     private final UpdateHelper updateHelper;
-    private final CommandHelper commandHelper;
+    private final UserResolver userResolver;
 
     @BotCommand(chatTypes = ChatType.GROUP,
             description = """
@@ -33,17 +35,17 @@ public class TokenController {
                     """
     )
     @SuppressWarnings("unused")
-    public SendMessage RemainingTokens(Update update) {
-        Long chatId = updateHelper.extractChatId(update);
-        Long userId = updateHelper.extractUserId(update);
-        var userChatOptional = userChatService.getUserChatBy(chatId, userId);
+    public SendMessage remainingTokens(ChatMessageReceivedDto receivedMessage) {
+        ChatId chatId = receivedMessage.chatId();
+        UserId userId = receivedMessage.userId();
+        var userChatOptional = userChatService.getUserChatBy(chatId.value(), userId.value());
         if (userChatOptional.isEmpty()) {
             throw new IllegalStateException("User chat not found. Add the bot to the group first.");
         }
         var userChat = userChatOptional.get();
         String userName = userChat.userReadDto().name();
         Long tokensLeft = userChat.remainingTokens();
-        return updateHelper.generateMessage(update, userName + ", you have " + tokensLeft + " token(s) remaining.");
+        return updateHelper.generateMessage(receivedMessage, userName + ", you have " + tokensLeft + " token(s) remaining.");
     }
 
 
@@ -54,20 +56,21 @@ public class TokenController {
                     Usage: /add_tokens @username 20
                     """)
     @SuppressWarnings("unused")
-    public SendMessage addTokens(Update update) {
-        List<String> arguments = updateHelper.extractArguments(update);
+    public SendMessage addTokens(ChatMessageReceivedDto receivedMessage) {
+        List<String> arguments = updateHelper.extractArguments(receivedMessage.text());
         if (arguments.size() != 2) {
-            return updateHelper.generateMessage(update, "Invalid number of arguments <userName> <count>. Expected 2 but found " + arguments.size());
+            return updateHelper.generateMessage(receivedMessage, "Invalid number of arguments <userName> <count>. Expected 2 but found " + arguments.size());
         }
-        Long chatId = updateHelper.extractChatId(update);
-        Optional<UserChatReadDto> userOpt = commandHelper.resolveUserFromArgs(userChatService, chatId, arguments);
-        if (userOpt.isEmpty()) return commandHelper.handleUserNotFound(update, arguments);
+        ChatId chatId = receivedMessage.chatId();
+        String input = arguments.getFirst();
+        Optional<UserChatReadDto> userOpt = userResolver.resolveUserByNameOrUsername(userChatService, chatId.value(), input);
+        if (userOpt.isEmpty()) return userResolver.handleUserNotFound(receivedMessage, input);
 
         Long countAdd = Long.parseLong(arguments.get(1));
         UserChatReadDto user = userOpt.get();
         UserChatUpdateDto dto = new UserChatUpdateDto(user.remainingTokens() + countAdd, null);
         userChatService.updateUserChat(user.id(), dto);
-        return updateHelper.generateMessage(update, user.userReadDto().name() + ", you have " + countAdd + " token(s) added.");
+        return updateHelper.generateMessage(receivedMessage, user.userReadDto().name() + ", you have " + countAdd + " token(s) added.");
     }
 
     @BotCommand(chatTypes = ChatType.GROUP, showInMenu = false, userRole = UserRole.CHAT_ADMIN,
@@ -77,24 +80,24 @@ public class TokenController {
                     Usage: /add_tokens_all 20
                     """)
     @SuppressWarnings("unused")
-    public SendMessage addTokensForAll(Update update) {
-        Long chatId = updateHelper.extractChatId(update);
-        List<String> arguments = updateHelper.extractArguments(update);
+    public SendMessage addTokensForAll(ChatMessageReceivedDto receivedMessage) {
+        ChatId chatId = receivedMessage.chatId();
+        List<String> arguments = updateHelper.extractArguments(receivedMessage.text());
 
         if (arguments.size() != 1) {
-            return updateHelper.generateMessage(update, "Invalid number of arguments. Expected: <count>");
+            return updateHelper.generateMessage(receivedMessage, "Invalid number of arguments. Expected: <count>");
         }
 
         long tokensToAdd;
         try {
             tokensToAdd = Long.parseLong(arguments.getFirst());
         } catch (NumberFormatException e) {
-            return updateHelper.generateMessage(update, "Invalid number format. Example: /add_tokens_all 20");
+            return updateHelper.generateMessage(receivedMessage, "Invalid number format. Example: /add_tokens_all 20");
         }
 
-        List<UserChatReadDto> allUsers = userChatService.getUserChatsByChatId(chatId);
+        List<UserChatReadDto> allUsers = userChatService.getUserChatsByChatId(chatId.value());
         if (allUsers.isEmpty()) {
-            return updateHelper.generateMessage(update, "No users found in this chat.");
+            return updateHelper.generateMessage(receivedMessage, "No users found in this chat.");
         }
 
         for (UserChatReadDto userChat : allUsers) {
@@ -103,7 +106,7 @@ public class TokenController {
             userChatService.updateUserChat(userChat.id(), dto);
         }
 
-        return updateHelper.generateMessage(update, "Added " + tokensToAdd + " tokens to " + allUsers.size() + " users.");
+        return updateHelper.generateMessage(receivedMessage, "Added " + tokensToAdd + " tokens to " + allUsers.size() + " users.");
     }
 
 
@@ -116,22 +119,24 @@ public class TokenController {
                     """
     )
     @SuppressWarnings("unused")
-    public SendMessage showTokens(Update update) {
-        Long chatId = updateHelper.extractChatId(update);
-        List<String> arguments = updateHelper.extractArguments(update);
+    public SendMessage showTokens(ChatMessageReceivedDto receivedMessage) {
+        ChatId chatId = receivedMessage.chatId();
+        List<String> arguments = updateHelper.extractArguments(receivedMessage.text());
 
         if (!arguments.isEmpty()) {
-            Optional<UserChatReadDto> userOpt = commandHelper.resolveUserFromArgs(userChatService,chatId, arguments);
-            if (userOpt.isEmpty()) return commandHelper.handleUserNotFound(update, arguments);
+            String input = arguments.getFirst();
+
+            Optional<UserChatReadDto> userOpt = userResolver.resolveUserByNameOrUsername(userChatService,chatId.value(), input);
+            if (userOpt.isEmpty()) return userResolver.handleUserNotFound(receivedMessage, input);
 
             UserChatReadDto userChat = userOpt.get();
             String username = formatUsername(userChat);
-            return updateHelper.generateMessage(update, username + " has " + userChat.remainingTokens() + " token(s).");
+            return updateHelper.generateMessage(receivedMessage, username + " has " + userChat.remainingTokens() + " token(s).");
         }
 
-        List<UserChatReadDto> allUsers = userChatService.getUserChatsByChatId(chatId);
+        List<UserChatReadDto> allUsers = userChatService.getUserChatsByChatId(chatId.value());
         if (allUsers.isEmpty()) {
-            return updateHelper.generateMessage(update, "No users found in this chat.");
+            return updateHelper.generateMessage(receivedMessage, "No users found in this chat.");
         }
 
         StringBuilder builder = new StringBuilder("💬 Token List:\n");
@@ -140,7 +145,7 @@ public class TokenController {
             builder.append("- ").append(username).append(": ").append(user.remainingTokens()).append(" token(s)\n");
         }
 
-        return updateHelper.generateMessage(update, builder.toString());
+        return updateHelper.generateMessage(receivedMessage, builder.toString());
     }
 
 
