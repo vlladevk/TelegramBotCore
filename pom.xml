@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.pl.pcz.Yevkov</groupId>
-    <artifactId>TelegramBot</artifactId>
+    <artifactId>BotCoreApplication</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>TgBotTest</name>
     <description>TgBotTest</description>
