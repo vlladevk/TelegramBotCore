@@ -9,26 +9,56 @@ import org.pl.pcz.yevkov.botcore.domain.entity.UserRole;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+
 
 @Log4j2
 @Component
 public class DefaultBotCommandFactory implements BotCommandFactory {
+
     @Override
     public RegisteredCommand create(@NonNull Object handler, @NonNull Method method) {
         BotCommand annotation = method.getAnnotation(BotCommand.class);
-        String name = annotation.name().isEmpty() ? "/" + processMethodName(method.getName()) : annotation.name();
+
+        String name = annotation.name().isEmpty()
+                ? "/" + processMethodName(method.getName())
+                : annotation.name();
         String description = annotation.description();
         boolean showInMenu = annotation.showInMenu();
         UserRole userRole = annotation.userRole();
-        ChatType[] typyChats = annotation.chatTypes();
-        RegisteredCommand registeredCommand = new RegisteredCommand(name, description, showInMenu, userRole, typyChats,handler, method);
-        log.info("Registered bot command: {} from {}#{}",
+        ChatType[] chatTypes = annotation.chatTypes();
+
+        RegisteredCommand registeredCommand = RegisteredCommand.builder()
+                .name(name)
+                .description(description)
+                .showInMenu(showInMenu)
+                .userRole(userRole)
+                .chatTypes(chatTypes)
+                .handler(handler)
+                .method(method)
+                .build();
+
+        log.info("Registered bot command: {} from {}#{} (role={}, chats={})",
                 registeredCommand.name(),
                 handler.getClass().getSimpleName(),
-                method.getName());
+                method.getName(),
+                userRole,
+                Arrays.toString(chatTypes)
+        );
+
         return registeredCommand;
     }
-    // startBot -> start_bot
+
+    /**
+     * Converts a camelCase Java method name into a snake_case command name.
+     *
+     * <p>
+     * Example: {@code startBot → start_bot}
+     * </p>
+     *
+     * @param name the original method name
+     * @return the converted command name in snake_case
+     */
     private String processMethodName(String name) {
         return name.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
     }

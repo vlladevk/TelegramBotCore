@@ -6,13 +6,13 @@ import lombok.extern.log4j.Log4j2;
 import org.pl.pcz.yevkov.botcore.application.command.access.CommandAccessResult;
 import org.pl.pcz.yevkov.botcore.application.command.access.CommandPermissionChecker;
 import org.pl.pcz.yevkov.botcore.application.command.error.CommandErrorHandler;
+import org.pl.pcz.yevkov.botcore.application.command.exception.CommandExecutionException;
 import org.pl.pcz.yevkov.botcore.application.command.executor.CommandExecutor;
 import org.pl.pcz.yevkov.botcore.application.command.parser.CommandExtractor;
 import org.pl.pcz.yevkov.botcore.application.command.registry.BotCommandProvider;
+import org.pl.pcz.yevkov.botcore.application.command.registry.RegisteredCommand;
 import org.pl.pcz.yevkov.botcore.application.command.response.TextResponse;
 import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
-import org.pl.pcz.yevkov.botcore.domain.vo.UserId;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -29,42 +29,64 @@ public class CommandDispatcher {
     private final CommandExtractor commandExtractor;
 
 
-    public Optional<TextResponse> handle(@NonNull ChatMessageReceivedDto receivedMessage) {
-        if (receivedMessage.text().isEmpty()) {
-            return commandErrorHandler.handleEmptyMessage(receivedMessage);
+    public Optional<TextResponse> handle(@NonNull ChatMessageReceivedDto message) {
+        return dispatch(message);
+    }
+
+
+    public Optional<TextResponse> dispatch(@NonNull ChatMessageReceivedDto message) {
+        if (isTextEmpty(message)) {
+            return commandErrorHandler.handleEmptyMessage(message);
         }
 
-        ChatId chatId = receivedMessage.chatId();
-        UserId userId = receivedMessage.userId();
-        String command = commandExtractor.extract(receivedMessage.text());
+        String command = extractCommand(message.text());
+        log.info("Received command: '{}' from {} in {}", command, message.userId(), message.chatId());
 
-        log.info("Received command: '{}' from {} in {}", command, userId, chatId);
-
-        var registeredCommandOptional = botCommandProvider.getRegisteredCommand(command);
-
-        if (registeredCommandOptional.isEmpty()) {
-            return commandErrorHandler.handleUnknownCommand(receivedMessage, command);
+        Optional<RegisteredCommand> commandOpt = getRegisteredCommand(command);
+        if (commandOpt.isEmpty()) {
+            return commandErrorHandler.handleUnknownCommand(message, command);
         }
+
+        RegisteredCommand registeredCommand = commandOpt.get();
+        CommandAccessResult access = commandPermissionChecker.hasAccess(message, registeredCommand);
+        if (!access.allowed()) {
+            return commandErrorHandler.handleAccessDenied(message, access, command);
+        }
+
+        return executeCommand(message, command, registeredCommand);
+    }
+
+
+    private Optional<TextResponse> executeCommand(ChatMessageReceivedDto message, String command, RegisteredCommand cmd) {
         try {
-            var registeredCommand = registeredCommandOptional.get();
-            var method = registeredCommand.method();
             log.debug("Executing command: '{}' via method {} on {}",
-                    command, method.getName(), registeredCommand.handler().getClass().getSimpleName());
-            CommandAccessResult access = commandPermissionChecker.hasAccess(receivedMessage, registeredCommand);
-            if (!access.allowed()) {
-                return commandErrorHandler.handleAccessDenied(receivedMessage, access, command);
-            }
+                    command, cmd.method().getName(), cmd.handler().getClass().getSimpleName());
 
-            log.info("Dispatching command: '{}' for userId={} in chatId={}", command, userId, chatId);
+            log.info("Dispatching command: '{}' for userId={} in chatId={}",
+                    command, message.userId(), message.chatId());
 
-            return commandExecutor.execute(registeredCommand, receivedMessage);
+            return commandExecutor.execute(cmd, message);
+        } catch (CommandExecutionException e) {
+            return commandErrorHandler.handleExecutionError(message, command, e);
         } catch (Exception e) {
-            return commandErrorHandler.handleExecutionError(receivedMessage, command, e);
+            log.error("Unexpected error during dispatching of command '{}': {}",
+                    command, e.getMessage(), e);
+            return commandErrorHandler.handleExecutionError(message, command, e);
         }
     }
 
-    public boolean isCommandAllowed(@NonNull String text) {
-        String command = commandExtractor.extract(text);
-        return botCommandProvider.getRegisteredCommand(command).isPresent();
+
+    private boolean isTextEmpty(ChatMessageReceivedDto message) {
+        return message.text().isEmpty();
+    }
+
+
+    private String extractCommand(String text) {
+        return commandExtractor.extract(text);
+    }
+
+
+    private Optional<RegisteredCommand> getRegisteredCommand(String command) {
+        return botCommandProvider.getRegisteredCommand(command);
     }
 }

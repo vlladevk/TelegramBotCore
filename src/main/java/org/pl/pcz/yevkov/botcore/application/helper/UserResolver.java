@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
+
 @Component
 @RequiredArgsConstructor
 public class UserResolver {
@@ -37,10 +38,12 @@ public class UserResolver {
         return service.getUserChatByUserName(chatId, username.substring(1));
     }
 
+
     private Optional<UserChatReadDto> findByFirstName(UserChatService service, ChatId chatId, String firstName) {
         List<UserChatReadDto> matches = service.getUserChatsByFirstName(chatId, firstName);
         return matches.size() == 1 ? Optional.of(matches.getFirst()) : Optional.empty();
     }
+
 
     public TextResponse handleUserNotFound(@NonNull ChatMessageReceivedDto receivedMessage, @NonNull String input) {
         String trimmed = input.trim();

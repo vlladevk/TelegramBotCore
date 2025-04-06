@@ -13,6 +13,21 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 
 import java.util.List;
 
+/**
+ * Application-level component responsible for publishing bot command metadata
+ * to the Telegram platform during application startup.
+ *
+ * <p>
+ * This component listens for the Spring {@link ContextRefreshedEvent} and
+ * pushes all registered {@link RegisteredCommand} instances (marked with
+ * {@code showInMenu=true}) to Telegram using {@link BotApiAdapter}.
+ * </p>
+ *
+ * <p>
+ * Any failure in communication with the Telegram Bot API results in a fatal
+ * application error.
+ * </p>
+ */
 @Component
 @RequiredArgsConstructor
 @Log4j2
@@ -20,8 +35,19 @@ public class CommandRegistrar {
     private final BotApiAdapter telegramBot;
     private final BotCommandCatalog commandCatalog;
 
-    @EventListener
-    public void onApplicationReady(ContextRefreshedEvent ignore) {
+    /**
+     * Initializes Telegram command menu after the Spring application context is fully initialized.
+     *
+     * <p>
+     * Filters all registered commands from {@link BotCommandCatalog} that are marked
+     * as visible in the menu ({@code showInMenu=true}) and registers them using
+     * {@link SetMyCommands}.
+     * </p>
+     *
+     * @throws RuntimeException if command registration with Telegram fails
+     */
+    @EventListener(ContextRefreshedEvent.class)
+    public void onApplicationReady() {
         try {
             log.info("Registering {} Telegram commands...", commandCatalog.getAllRegisteredCommands()
                     .stream().filter(RegisteredCommand::showInMenu).count());

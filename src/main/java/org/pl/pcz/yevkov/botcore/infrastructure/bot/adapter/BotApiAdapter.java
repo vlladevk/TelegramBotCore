@@ -7,10 +7,10 @@ import org.pl.pcz.yevkov.botcore.application.command.response.GetChatMemberReque
 import org.pl.pcz.yevkov.botcore.application.command.response.TextResponse;
 import org.pl.pcz.yevkov.botcore.infrastructure.bot.exception.BotApiException;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 
 public interface BotApiAdapter {
-    Long getBotId() throws TelegramApiException;
+    Long getBotId() throws BotApiException;
     void execute(@NonNull TextResponse sendMessage) throws BotApiException;
     void execute (@NonNull SetMyCommands commands) throws BotApiException;
     ChatMemberInfo execute (@NonNull GetChatMemberRequest commands) throws BotApiException;

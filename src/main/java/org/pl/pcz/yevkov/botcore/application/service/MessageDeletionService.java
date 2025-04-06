@@ -2,9 +2,9 @@ package org.pl.pcz.yevkov.botcore.application.service;
 
 import lombok.RequiredArgsConstructor;
 import org.pl.pcz.yevkov.botcore.application.command.response.DeleteMessageRequest;
-import org.pl.pcz.yevkov.botcore.infrastructure.bot.adapter.BotApiAdapter;
 import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
 import org.pl.pcz.yevkov.botcore.domain.vo.MessageId;
+import org.pl.pcz.yevkov.botcore.infrastructure.bot.adapter.BotApiAdapter;
 import org.springframework.stereotype.Service;
 
 @Service

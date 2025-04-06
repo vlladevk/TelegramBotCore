@@ -2,9 +2,9 @@ package org.pl.pcz.yevkov.botcore.application.event.registry;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.pl.pcz.yevkov.botcore.application.dto.event.EventDto;
 import org.pl.pcz.yevkov.botcore.application.event.exception.DuplicateEventRegistrationException;
 import org.pl.pcz.yevkov.botcore.application.event.factory.BotEventFactory;
-import org.pl.pcz.yevkov.botcore.application.dto.event.EventDto;
 import org.pl.pcz.yevkov.botcore.domain.event.BotEvent;
 import org.springframework.stereotype.Component;
 
@@ -12,18 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Central registry for mapping {@link EventDto} types to their corresponding {@link BotEvent} definitions.
- *
- * <p>This component is responsible for:</p>
- * <p>
- * - Registering event classes via {@link BotEventFactory}<br>
- * - Providing lookup access to registered event metadata<br>
- * </p>
- *
- * <p>All registrations must be unique per {@link EventDto} type.
- * Duplicate registrations will result in a {@link DuplicateEventRegistrationException}.</p>
- */
+
 @Component
 @RequiredArgsConstructor
 public class BotEventCatalog implements BotEventRegistrar, BotEventProvider {

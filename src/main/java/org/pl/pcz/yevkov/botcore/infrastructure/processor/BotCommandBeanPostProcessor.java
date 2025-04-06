@@ -16,6 +16,11 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 
 
+/**
+ * {@link BeanPostProcessor} that processes beans annotated with {@link CommandController}.
+ * It scans methods for the {@link BotCommand} annotation and registers them with the {@link BotCommandRegistrar}
+ * for later execution. This enables dynamic discovery and handling of bot commands.
+ */
 @Component
 @RequiredArgsConstructor
 public class BotCommandBeanPostProcessor implements BeanPostProcessor {

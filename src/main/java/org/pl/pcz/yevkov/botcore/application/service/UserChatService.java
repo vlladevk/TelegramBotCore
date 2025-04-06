@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+
 @Log4j2
 @Service
 @Transactional
@@ -29,15 +30,17 @@ public class UserChatService {
     private final UserChatReadMapper userChatReadMapper;
     private final UserChatUpdateMapper userChatUpdateMapper;
 
-    public void  createUserChat(UserChatCreateDto user) {
+    public void createUserChat(UserChatCreateDto user) {
         var userChat = userChatCreateMapper.mapFrom(user);
         log.debug("Mapped UserChat entity: {}", userChat);
-        var saved =  userChatRepository.save(userChat);
-        log.info("Created UserChat: id={}, userId={}, chatId={}", saved.getId(), saved.getUser().getId(), saved.getChat().getId());}
+        var saved = userChatRepository.save(userChat);
+        log.info("Created UserChat: id={}, userId={}, chatId={}", saved.getId(), saved.getUser().getId(), saved.getChat().getId());
+    }
 
     public List<UserChatReadDto> getAllUserChats() {
         return userChatRepository.findAll().stream().map(userChatReadMapper::mapFrom).toList();
     }
+
 
     public Optional<UserChatReadDto> getUserChatBy(ChatId chatId, UserId userId) {
         var userChatOptional = userChatRepository.findUserChatByChatIdAndUserId(chatId.value(), userId.value());
@@ -48,6 +51,7 @@ public class UserChatService {
         }
         return userChatOptional.map(userChatReadMapper::mapFrom);
     }
+
 
     public void updateChatStatus(ChatId chatId, UserId userId, UserRole userRole) {
         var userChatOptional = userChatRepository
@@ -61,8 +65,9 @@ public class UserChatService {
         }
     }
 
+
     public void updateUserChat(Long id, UserChatUpdateDto userChatUpdateDto) {
-        Optional<UserChat> userChatOptional =  userChatRepository.findById(id);
+        Optional<UserChat> userChatOptional = userChatRepository.findById(id);
         if (userChatOptional.isPresent()) {
             userChatUpdateMapper.updateFromDto(userChatUpdateDto, userChatOptional.get());
             log.info("Updated UserChat with id={}", id);

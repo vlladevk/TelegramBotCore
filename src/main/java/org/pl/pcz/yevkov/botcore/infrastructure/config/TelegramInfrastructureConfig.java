@@ -10,13 +10,15 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+
 @Configuration
 @EnableScheduling
-public class BotConfiguration {
+public class TelegramInfrastructureConfig {
     @Bean
     public TelegramBotsApi telegramBotsApi(@NonNull TelegramBot telegramBot) throws TelegramApiException {
-        var ApiBot = new TelegramBotsApi(DefaultBotSession.class);
-        ApiBot.registerBot(telegramBot);
-        return ApiBot;
+        var apiBot = new TelegramBotsApi(DefaultBotSession.class);
+        apiBot.registerBot(telegramBot);
+        return apiBot;
     }
+
 }

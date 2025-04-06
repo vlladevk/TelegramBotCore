@@ -5,12 +5,32 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.pl.pcz.yevkov.botcore.application.command.access.CommandAccessResult;
 import org.pl.pcz.yevkov.botcore.application.command.response.TextResponse;
-import org.pl.pcz.yevkov.botcore.application.message.factory.MessageResponseFactory;
 import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
+import org.pl.pcz.yevkov.botcore.application.message.factory.MessageResponseFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+
+/**
+ * Default implementation of {@link CommandErrorHandler} responsible for generating
+ * error responses during various failure stages of command processing.
+ *
+ * <p>
+ * This handler covers the following error scenarios:
+ * </p>
+ * <ul>
+ *   <li>Empty or null message text</li>
+ *   <li>Unrecognized command name</li>
+ *   <li>Access denied due to insufficient permissions</li>
+ *   <li>Runtime errors during command execution</li>
+ * </ul>
+ *
+ * <p>
+ * All error messages are formatted and returned as {@link TextResponse} objects
+ * using {@link MessageResponseFactory}.
+ * </p>
+ */
 @Log4j2
 @Component
 @RequiredArgsConstructor

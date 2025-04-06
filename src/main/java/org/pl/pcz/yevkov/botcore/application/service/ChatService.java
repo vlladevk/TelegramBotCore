@@ -6,15 +6,14 @@ import org.pl.pcz.yevkov.botcore.application.dto.chat.ChatCreateDto;
 import org.pl.pcz.yevkov.botcore.application.dto.chat.ChatReadDto;
 import org.pl.pcz.yevkov.botcore.domain.entity.Chat;
 import org.pl.pcz.yevkov.botcore.domain.entity.ChatStatus;
+import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
 import org.pl.pcz.yevkov.botcore.infrastructure.mapper.chat.ChatCreateMapper;
 import org.pl.pcz.yevkov.botcore.infrastructure.mapper.chat.ChatReadMapper;
-import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
 import org.pl.pcz.yevkov.botcore.infrastructure.repository.ChatRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-
 
 @Log4j2
 @Service
@@ -33,6 +32,7 @@ public class ChatService {
         log.info("Created Chat: id={}, status={}", saved.getId(), saved.getChatStatus());
     }
 
+
     public Optional<ChatReadDto> findChatById(ChatId chatId) {
         log.debug("Fetching Chat by id={}", chatId);
         Optional<Chat> chat = chatRepository.findById(chatId.value());
@@ -44,6 +44,7 @@ public class ChatService {
         return chat.map(chatReadMapper::mapFrom);
     }
 
+
     public void markChatAsStatus(ChatId chatId, ChatStatus status) {
         var chatOptional = chatRepository.findById(chatId.value());
         if (chatOptional.isPresent()) {
@@ -54,6 +55,7 @@ public class ChatService {
             log.warn("Chat not found. Cannot update status. chatId={}, newStatus={}", chatId, status);
         }
     }
+
 
     public Optional<ChatReadDto> changeLimit(ChatId chatId, Long newLimit) {
         var chatOptional = chatRepository.findById(chatId.value());

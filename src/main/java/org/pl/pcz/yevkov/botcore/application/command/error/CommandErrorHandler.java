@@ -7,7 +7,9 @@ import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
 
 import java.util.Optional;
 
+
 public interface CommandErrorHandler {
+
     Optional<TextResponse> handleEmptyMessage(@NonNull ChatMessageReceivedDto dto);
 
     Optional<TextResponse> handleUnknownCommand(@NonNull ChatMessageReceivedDto dto, @NonNull String command);

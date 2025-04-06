@@ -1,17 +1,22 @@
 package org.pl.pcz.yevkov.botcore.application.command.registry;
 
 
-import org.pl.pcz.yevkov.botcore.domain.entity.UserRole;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import org.pl.pcz.yevkov.botcore.domain.entity.ChatType;
+import org.pl.pcz.yevkov.botcore.domain.entity.UserRole;
 
 import java.lang.reflect.Method;
 
+
+@Builder
 public record RegisteredCommand(
-        String name,
-        String description,
+        @NotNull String name,
+        @NotNull String description,
         boolean showInMenu,
-        UserRole userRole,
-        ChatType[] chatTypes,
-        Object handler,
-        Method method
-) {}
+        @NotNull UserRole userRole,
+        @NotNull ChatType[] chatTypes,
+        @NotNull Object handler,
+        @NotNull Method method
+) {
+}

@@ -2,16 +2,17 @@ package org.pl.pcz.yevkov.botcore.application.service;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.pl.pcz.yevkov.botcore.application.command.access.CommandPermissionChecker;
 import org.pl.pcz.yevkov.botcore.application.command.access.CommandAccessResult;
+import org.pl.pcz.yevkov.botcore.application.command.access.CommandPermissionChecker;
 import org.pl.pcz.yevkov.botcore.application.command.registry.RegisteredCommand;
-import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
 import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.botcore.domain.vo.UserId;
 import org.pl.pcz.yevkov.botcore.domain.entity.ChatType;
+import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
+import org.pl.pcz.yevkov.botcore.domain.vo.UserId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -29,13 +30,13 @@ public class CommandAccessServer implements CommandPermissionChecker {
         if (chatType != ChatType.PRIVATE) {
             var userChatReadDtoOptional = userChatService.getUserChatBy(chatId, userId);
             if (userChatReadDtoOptional.isEmpty()) {
-                return new CommandAccessResult(true, "bot doesn't Active");
+                return new CommandAccessResult(true, "Bot is not configured for this chat");
             }
             var userChatReadDto = userChatReadDtoOptional.get();
             var userRole = userChatReadDto.userRole();
             var neededRole = command.userRole();
 
-            if (userRole.ordinal() < neededRole.ordinal() && userId.value()  != 732156592L) {
+            if (userRole.ordinal() < neededRole.ordinal()) {
                 return new CommandAccessResult(false, "Insufficient permissions. Required role: " + neededRole.name());
             }
         }

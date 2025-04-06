@@ -29,7 +29,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         log.info("Telegram bot initialized: {}", props.name());
     }
 
-
     @Override
     public void onUpdateReceived(@NonNull Update update) {
         log.info("Received update: {}", update);

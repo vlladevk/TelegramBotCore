@@ -10,12 +10,6 @@ import java.lang.reflect.Constructor;
 /**
  * Holds metadata about a registered {@link BotEvent} type,
  * including its associated {@link EventDto} class and the reflective constructor.
- *
- * <p>This record is used by event factories and registries to instantiate
- * {@link BotEvent} instances based on incoming DTOs.</p>
- *
- * @param clazzDto         the {@link EventDto} type associated with the event
- * @param eventConstructor the reflective constructor that accepts the corresponding DTO
  */
 public record RegisteredEvent(
         @NonNull Class<? extends EventDto> clazzDto,
