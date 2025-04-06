@@ -4,11 +4,11 @@ package org.pl.pcz.yevkov.tgbottest.controller;
 import lombok.RequiredArgsConstructor;
 import org.pl.pcz.yevkov.tgbottest.annotation.BotCommand;
 import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
-import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
+import org.pl.pcz.yevkov.tgbottest.application.command.parser.ArgumentExtractor;
+import org.pl.pcz.yevkov.tgbottest.application.command.response.TextResponse;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UserResolver;
-import org.pl.pcz.yevkov.tgbottest.application.message.facrory.MessageDtoFactory;
+import org.pl.pcz.yevkov.tgbottest.application.message.factory.MessageResponseFactory;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.tgbottest.dto.message.SendMessageDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatUpdateDto;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
@@ -24,9 +24,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TokenController {
     private final UserChatService userChatService;
-    private final UpdateHelper updateHelper;
+    private final ArgumentExtractor argumentExtractor;
     private final UserResolver userResolver;
-    private final MessageDtoFactory messageFactory;
+    private final MessageResponseFactory messageFactory;
 
     @BotCommand(chatTypes = ChatType.GROUP,
             description = """
@@ -36,7 +36,7 @@ public class TokenController {
                     """
     )
     @SuppressWarnings("unused")
-    public SendMessageDto remainingTokens(ChatMessageReceivedDto receivedMessage) {
+    public TextResponse remainingTokens(ChatMessageReceivedDto receivedMessage) {
         ChatId chatId = receivedMessage.chatId();
         UserId userId = receivedMessage.userId();
 
@@ -49,7 +49,7 @@ public class TokenController {
         String userName = userChat.userReadDto().name();
         Long tokensLeft = userChat.remainingTokens();
 
-        return messageFactory.generateMessage(
+        return messageFactory.generateResponse(
                 receivedMessage,
                 userName + ", you have " + tokensLeft + " token(s) remaining."
         );
@@ -63,10 +63,10 @@ public class TokenController {
                     Usage: /add_tokens @username 20
                     """)
     @SuppressWarnings("unused")
-    public SendMessageDto addTokens(ChatMessageReceivedDto receivedMessage) {
-        List<String> arguments = updateHelper.extractArguments(receivedMessage.text());
+    public TextResponse addTokens(ChatMessageReceivedDto receivedMessage) {
+        List<String> arguments = argumentExtractor.extract(receivedMessage.text());
         if (arguments.size() != 2) {
-            return messageFactory.generateMessage(
+            return messageFactory.generateResponse(
                     receivedMessage,
                     "Invalid number of arguments <userName> <count>. Expected 2 but found " + arguments.size()
             );
@@ -78,10 +78,12 @@ public class TokenController {
 
         Long countAdd = Long.parseLong(arguments.get(1));
         UserChatReadDto user = userOpt.get();
-        UserChatUpdateDto dto = new UserChatUpdateDto(user.remainingTokens() + countAdd, null);
+        UserChatUpdateDto dto = UserChatUpdateDto.builder()
+                .remainingTokens(user.remainingTokens() + countAdd)
+                .build();
         userChatService.updateUserChat(user.id(), dto);
 
-        return messageFactory.generateMessage(
+        return messageFactory.generateResponse(
                 receivedMessage,
                 user.userReadDto().name() + ", you have " + countAdd + " token(s) added."
         );
@@ -94,12 +96,12 @@ public class TokenController {
                     Usage: /add_tokens_all 20
                     """)
     @SuppressWarnings("unused")
-    public SendMessageDto addTokensForAll(ChatMessageReceivedDto receivedMessage) {
+    public TextResponse addTokensForAll(ChatMessageReceivedDto receivedMessage) {
         ChatId chatId = receivedMessage.chatId();
-        List<String> arguments = updateHelper.extractArguments(receivedMessage.text());
+        List<String> arguments = argumentExtractor.extract(receivedMessage.text());
 
         if (arguments.size() != 1) {
-            return messageFactory.generateMessage(
+            return messageFactory.generateResponse(
                     receivedMessage,
                     "Invalid number of arguments. Expected: <count>"
             );
@@ -109,7 +111,7 @@ public class TokenController {
         try {
             tokensToAdd = Long.parseLong(arguments.getFirst());
         } catch (NumberFormatException e) {
-            return messageFactory.generateMessage(
+            return messageFactory.generateResponse(
                     receivedMessage,
                     "Invalid number format. Example: /add_tokens_all 20"
             );
@@ -117,7 +119,7 @@ public class TokenController {
 
         List<UserChatReadDto> allUsers = userChatService.getUserChatsByChatId(chatId);
         if (allUsers.isEmpty()) {
-            return messageFactory.generateMessage(
+            return messageFactory.generateResponse(
                     receivedMessage,
                     "No users found in this chat."
             );
@@ -125,11 +127,13 @@ public class TokenController {
 
         for (UserChatReadDto userChat : allUsers) {
             long updatedTokens = userChat.remainingTokens() + tokensToAdd;
-            UserChatUpdateDto dto = new UserChatUpdateDto(updatedTokens, null);
+            UserChatUpdateDto dto = UserChatUpdateDto.builder()
+                    .remainingTokens(updatedTokens)
+                    .build();
             userChatService.updateUserChat(userChat.id(), dto);
         }
 
-        return messageFactory.generateMessage(
+        return messageFactory.generateResponse(
                 receivedMessage,
                 "Added " + tokensToAdd + " tokens to " + allUsers.size() + " users."
         );
@@ -144,9 +148,9 @@ public class TokenController {
                     """
     )
     @SuppressWarnings("unused")
-    public SendMessageDto showTokens(ChatMessageReceivedDto receivedMessage) {
+    public TextResponse showTokens(ChatMessageReceivedDto receivedMessage) {
         ChatId chatId = receivedMessage.chatId();
-        List<String> arguments = updateHelper.extractArguments(receivedMessage.text());
+        List<String> arguments = argumentExtractor.extract(receivedMessage.text());
 
         if (!arguments.isEmpty()) {
             String input = arguments.getFirst();
@@ -157,7 +161,7 @@ public class TokenController {
             UserChatReadDto userChat = userOpt.get();
             String username = formatUsername(userChat);
 
-            return messageFactory.generateMessage(
+            return messageFactory.generateResponse(
                     receivedMessage,
                     username + " has " + userChat.remainingTokens() + " token(s)."
             );
@@ -165,7 +169,7 @@ public class TokenController {
 
         List<UserChatReadDto> allUsers = userChatService.getUserChatsByChatId(chatId);
         if (allUsers.isEmpty()) {
-            return messageFactory.generateMessage(
+            return messageFactory.generateResponse(
                     receivedMessage,
                     "No users found in this chat."
             );
@@ -177,7 +181,7 @@ public class TokenController {
             builder.append("- ").append(username).append(": ").append(user.remainingTokens()).append(" token(s)\n");
         }
 
-        return messageFactory.generateMessage(
+        return messageFactory.generateResponse(
                 receivedMessage,
                 builder.toString()
         );

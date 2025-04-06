@@ -31,24 +31,15 @@ public class ChatMessageReceivedMapper implements BotEventMapper<Update, ChatMes
         Chat chat = message.getChat();
         User user = message.getFrom();
 
-        ChatId chatId = new ChatId(chat.getId());
-        UserId userId = new UserId(user.getId());
-        ThreadId threadId = new ThreadId( message.getMessageThreadId());
-        MessageId messageId = new MessageId( message.getMessageId());
-
-        String text = message.getText() == null ? "" : message.getText().trim();
-
-        ChatType chatType = "private".equals(chat.getType()) ? ChatType.PRIVATE : ChatType.GROUP;
-
-        return new ChatMessageReceivedDto(
-                chatId,
-                userId,
-                threadId,
-                messageId,
-                user.getUserName(),
-                user.getFirstName(),
-                text,
-                chatType
-        );
+        return ChatMessageReceivedDto.builder()
+                .chatId(new ChatId(chat.getId()))
+                .userId(new UserId(user.getId()))
+                .threadId(new ThreadId(message.getMessageThreadId()))
+                .messageId(new MessageId(message.getMessageId()))
+                .username(user.getUserName())
+                .firstName(user.getFirstName())
+                .text(message.getText() == null ? "" : message.getText().trim())
+                .chatType("private".equals(chat.getType()) ? ChatType.PRIVATE : ChatType.GROUP)
+                .build();
     }
 }

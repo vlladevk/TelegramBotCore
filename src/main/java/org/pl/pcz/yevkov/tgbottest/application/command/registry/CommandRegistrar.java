@@ -3,13 +3,13 @@ package org.pl.pcz.yevkov.tgbottest.application.command.registry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.pl.pcz.yevkov.tgbottest.bot.adapter.BotApiAdapter;
+import org.pl.pcz.yevkov.tgbottest.bot.exception.BotApiException;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class CommandRegistrar {
                     null);
             telegramBot.execute(setMyCommands);
             log.info("Telegram commands registered successfully");
-        } catch (TelegramApiException e) {
+        } catch (BotApiException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }

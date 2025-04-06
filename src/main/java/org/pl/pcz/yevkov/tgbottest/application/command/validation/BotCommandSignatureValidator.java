@@ -3,7 +3,7 @@ package org.pl.pcz.yevkov.tgbottest.application.command.validation;
 import lombok.NonNull;
 import org.pl.pcz.yevkov.tgbottest.annotation.BotCommand;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.tgbottest.dto.message.SendMessageDto;
+import org.pl.pcz.yevkov.tgbottest.application.command.response.TextResponse;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -18,7 +18,7 @@ public class BotCommandSignatureValidator implements CommandSignatureValidator {
         }
 
         Class<?> returnType = method.getReturnType();
-        if (!SendMessageDto.class.equals(returnType) && !void.class.equals(returnType)) {
+        if (!TextResponse.class.equals(returnType) && !void.class.equals(returnType)) {
             throw new IllegalStateException("@" + BotCommand.class.getSimpleName() + " method '" + method.getName() +
                     "' must return either SendMessage or void");
         }

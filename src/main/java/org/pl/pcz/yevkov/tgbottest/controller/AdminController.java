@@ -4,11 +4,11 @@ package org.pl.pcz.yevkov.tgbottest.controller;
 import lombok.RequiredArgsConstructor;
 import org.pl.pcz.yevkov.tgbottest.annotation.BotCommand;
 import org.pl.pcz.yevkov.tgbottest.annotation.CommandController;
-import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
+import org.pl.pcz.yevkov.tgbottest.application.command.parser.ArgumentExtractor;
+import org.pl.pcz.yevkov.tgbottest.application.command.response.TextResponse;
 import org.pl.pcz.yevkov.tgbottest.application.helper.UserResolver;
-import org.pl.pcz.yevkov.tgbottest.application.message.facrory.MessageDtoFactory;
+import org.pl.pcz.yevkov.tgbottest.application.message.factory.MessageResponseFactory;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.tgbottest.dto.message.SendMessageDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatUpdateDto;
 import org.pl.pcz.yevkov.tgbottest.entity.ChatType;
@@ -23,9 +23,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AdminController {
     private final UserChatService userChatService;
-    private final UpdateHelper updateHelper;
+    private final ArgumentExtractor argumentExtractor;
     private final UserResolver userResolver;
-    private final MessageDtoFactory messageFactory;
+    private final MessageResponseFactory messageFactory;
 
 
     @BotCommand(chatTypes = ChatType.GROUP, showInMenu = false, userRole = UserRole.CHAT_ADMIN,
@@ -35,14 +35,14 @@ public class AdminController {
                     Usage: /add_admin @username
                     """)
     @SuppressWarnings("unused")
-    public SendMessageDto addAdmin(ChatMessageReceivedDto receivedMessage) {
-        List<String> arguments = updateHelper.extractArguments(receivedMessage.text());
+    public TextResponse addAdmin(ChatMessageReceivedDto receivedMessage) {
+        List<String> arguments = argumentExtractor.extract(receivedMessage.text());
         if (arguments.size() != 1) {
 
             var sendText = "Invalid number of arguments <userName> or <FirstName>. Expected 1 but found "
                     + arguments.size();
 
-            return messageFactory.generateMessage(
+            return messageFactory.generateResponse(
                     receivedMessage,
                     sendText
             );
@@ -53,10 +53,12 @@ public class AdminController {
         Optional<UserChatReadDto> userOpt = userResolver.resolveUserByNameOrUsername(userChatService, chatId, input);
         if (userOpt.isEmpty()) return userResolver.handleUserNotFound(receivedMessage, input);
 
-        UserChatUpdateDto dto = new UserChatUpdateDto(null, UserRole.CHAT_ADMIN);
+        UserChatUpdateDto dto = UserChatUpdateDto.builder()
+                .userRole(UserRole.CHAT_ADMIN)
+                .build();
         userChatService.updateUserChat(userOpt.get().id(), dto);
 
-        return messageFactory.generateMessage(
+        return messageFactory.generateResponse(
                 receivedMessage,
                 "User promoted to admin."
         );
@@ -70,12 +72,12 @@ public class AdminController {
                     """
     )
     @SuppressWarnings("unused")
-    public SendMessageDto removeAdmin(ChatMessageReceivedDto receivedMessage) {
+    public TextResponse removeAdmin(ChatMessageReceivedDto receivedMessage) {
         ChatId chatId = receivedMessage.chatId();
-        List<String> arguments = updateHelper.extractArguments(receivedMessage.text());
+        List<String> arguments = argumentExtractor.extract(receivedMessage.text());
 
         if (arguments.size() != 1) {
-            return messageFactory.generateMessage(
+            return messageFactory.generateResponse(
                     receivedMessage,
                     "Invalid number of arguments. Expected: <userName> or <firstName>"
             );
@@ -87,14 +89,13 @@ public class AdminController {
         }
 
         UserChatReadDto userChatReadDto = resolved.get();
-        UserChatUpdateDto userChatUpdateDto = new UserChatUpdateDto(
-                null,
-                UserRole.USER
-        );
+        UserChatUpdateDto userChatUpdateDto = UserChatUpdateDto.builder()
+                .userRole(UserRole.USER)
+                .build();
 
         userChatService.updateUserChat(userChatReadDto.id(), userChatUpdateDto);
 
-        return messageFactory.generateMessage(
+        return messageFactory.generateResponse(
                 receivedMessage,
                 "Admin privileges removed successfully."
         );

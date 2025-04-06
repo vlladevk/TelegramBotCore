@@ -4,15 +4,16 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.pl.pcz.yevkov.tgbottest.application.command.dispatcher.CommandDispatcher;
-import org.pl.pcz.yevkov.tgbottest.application.helper.UpdateHelper;
-import org.pl.pcz.yevkov.tgbottest.application.message.facrory.MessageDtoFactory;
+import org.pl.pcz.yevkov.tgbottest.application.command.response.TextResponse;
+import org.pl.pcz.yevkov.tgbottest.application.message.factory.MessageResponseFactory;
 import org.pl.pcz.yevkov.tgbottest.bot.adapter.BotApiAdapter;
+import org.pl.pcz.yevkov.tgbottest.service.MessageDeletionService;
+import org.pl.pcz.yevkov.tgbottest.bot.exception.BotApiException;
 import org.pl.pcz.yevkov.tgbottest.dto.chat.ChatCreateDto;
 import org.pl.pcz.yevkov.tgbottest.dto.chat.ChatReadDto;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMemberJoinedDto;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMemberLeftDto;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.tgbottest.dto.message.SendMessageDto;
 import org.pl.pcz.yevkov.tgbottest.dto.user.UserCreateDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatCreateDto;
 import org.pl.pcz.yevkov.tgbottest.dto.userChat.UserChatReadDto;
@@ -43,8 +44,8 @@ public class TelegramUpdateListener {
     private final ChatService chatService;
     private final UserService userService;
     private final UserChatService userChatService;
-    private final UpdateHelper updateHelper;
-    private final MessageDtoFactory messageFactory;
+    private final MessageDeletionService messageDeletionService;
+    private final MessageResponseFactory messageFactory;
 
     /**
      * Main listener for Telegram updates.
@@ -81,7 +82,10 @@ public class TelegramUpdateListener {
                 chatService.markChatAsStatus(chatId, ChatStatus.INACTIVE);
                 log.info("Chat Status Updated on INACTIVE: {}", readDto);
             } else {
-                ChatCreateDto newChat = new ChatCreateDto(chatId, chatName);
+                ChatCreateDto newChat = ChatCreateDto.builder()
+                        .id(chatId)
+                        .title(chatName)
+                        .build();
                 chatService.createChat(newChat);
                 log.info("New chat created: {}", newChat);
             }
@@ -115,12 +119,12 @@ public class TelegramUpdateListener {
      * Sends the response from the dispatcher if any.
      */
     private void onTelegramCommand(@NonNull ChatMessageReceivedDto receivedMessage) {
-        Optional<SendMessageDto> message = dispatcher.handle(receivedMessage);
+        Optional<TextResponse> message = dispatcher.handle(receivedMessage);
         if (message.isPresent()) {
             var sendMessage = message.get();
             try {
                 telegramBot.execute(sendMessage);
-            } catch (TelegramApiException e) {
+            } catch (BotApiException e) {
                 log.error(e.getMessage(), e);
             }
         }
@@ -157,8 +161,8 @@ public class TelegramUpdateListener {
         if (userChat.remainingTokens() < messageLength) {
             try {
                 log.info("Deleting message from userId={} in chatId={} text='{}'", userId, chatId, messageText);
-                updateHelper.deleteUserMessage(receivedMessage, telegramBot);
-            } catch (TelegramApiException e) {
+                messageDeletionService.deleteMessage(receivedMessage.chatId(), receivedMessage.messageId());
+            } catch (BotApiException e) {
                 log.error("Error delete message", e);
             }
             notifyUserNoTokens(receivedMessage);
@@ -167,7 +171,9 @@ public class TelegramUpdateListener {
         }
 
         long updatedTokens = userChat.remainingTokens() - messageLength;
-        UserChatUpdateDto updateDto = new UserChatUpdateDto(updatedTokens, null);
+        UserChatUpdateDto updateDto = UserChatUpdateDto.builder()
+                .remainingTokens(updatedTokens)
+                .build();
         userChatService.updateUserChat(userChat.id(), updateDto);
 
         log.debug("Deducted {} tokens from user {} ({} tokens remaining)", messageLength, userId, updatedTokens);
@@ -216,7 +222,11 @@ public class TelegramUpdateListener {
      * Registers a new user in the database.
      */
     private void registrationUser(@NonNull UserId userId, @NonNull String firstName, String userName) {
-        UserCreateDto userCreateDto = new UserCreateDto(userId, firstName, userName);
+        UserCreateDto userCreateDto = UserCreateDto.builder()
+                .id(userId)
+                .name(firstName)
+                .userName(userName)
+                .build();
         log.debug("Attempting to register user: {}", userCreateDto);
         try {
             userService.createUser(userCreateDto);
@@ -229,9 +239,11 @@ public class TelegramUpdateListener {
      * Registers a user-chat relation with default role USER.
      */
     private void registrationUserChat(@NonNull ChatId chatId, @NonNull UserId userId) {
-        UserChatCreateDto userChatCreateDto = new UserChatCreateDto(
-                chatId, userId, UserRole.USER
-        );
+        UserChatCreateDto userChatCreateDto = UserChatCreateDto.builder()
+                .chatId(chatId)
+                .userId(userId)
+                .userRole(UserRole.USER)
+                .build();
         log.debug("Attempting to register UserChat: {}", userChatCreateDto);
         try {
             userChatService.createUserChat(userChatCreateDto);
@@ -251,7 +263,7 @@ public class TelegramUpdateListener {
                 To continue chatting, please ask an admin to recharge your tokens.
                 """.formatted(mention);
 
-        var sendMessage = messageFactory.generateMessage(
+        var sendMessage = messageFactory.generateResponse(
                 receivedMessage,
                 warningMessage
         );
@@ -259,7 +271,7 @@ public class TelegramUpdateListener {
         try {
             telegramBot.execute(sendMessage);
             log.info("Sent public token depletion warning for user {}", userId);
-        } catch (TelegramApiException e) {
+        } catch (BotApiException e) {
             log.error("Failed to send public token warning for user {}", userId, e);
         }
     }

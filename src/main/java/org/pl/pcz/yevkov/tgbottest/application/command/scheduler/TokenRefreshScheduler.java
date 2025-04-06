@@ -24,7 +24,9 @@ public class TokenRefreshScheduler {
                     var chat = userChatReadDto.chatReadDto();
                     long newRemainingTokens = userChatReadDto.remainingTokens();
                     if (newRemainingTokens < chat.hourLimit()) {
-                        UserChatUpdateDto updateInfo = new UserChatUpdateDto(chat.hourLimit(), null);
+                        UserChatUpdateDto updateInfo = UserChatUpdateDto.builder()
+                                .remainingTokens(chat.hourLimit())
+                                .build();
                         userChatService.updateUserChat(userChatReadDto.id(), updateInfo);
                     }
                 }

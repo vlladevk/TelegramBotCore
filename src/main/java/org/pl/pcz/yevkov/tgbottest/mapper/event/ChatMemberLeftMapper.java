@@ -27,14 +27,11 @@ public class ChatMemberLeftMapper implements BotEventMapper<Update, ChatMemberLe
         var message = update.getMessage();
         User user = message.getLeftChatMember();
 
-        ChatId chatId = new ChatId(message.getChatId());
-        UserId userId = new UserId(user.getId());
-
-        return new ChatMemberLeftDto(
-                chatId,
-                userId,
-                user.getUserName(),
-                user.getFirstName()
-        );
+        return ChatMemberLeftDto.builder()
+                .chatId(new ChatId(message.getChatId()))
+                .userId(new UserId(user.getId()))
+                .username(user.getUserName())
+                .firstName(user.getFirstName())
+                .build();
     }
 }

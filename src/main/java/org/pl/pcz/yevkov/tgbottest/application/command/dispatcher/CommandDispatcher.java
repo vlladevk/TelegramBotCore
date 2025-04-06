@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandAccessResult;
 import org.pl.pcz.yevkov.tgbottest.application.command.access.CommandPermissionChecker;
+import org.pl.pcz.yevkov.tgbottest.application.command.error.CommandErrorHandler;
+import org.pl.pcz.yevkov.tgbottest.application.command.executor.CommandExecutor;
+import org.pl.pcz.yevkov.tgbottest.application.command.parser.CommandExtractor;
 import org.pl.pcz.yevkov.tgbottest.application.command.registry.BotCommandProvider;
-import org.pl.pcz.yevkov.tgbottest.application.message.facrory.MessageDtoFactory;
+import org.pl.pcz.yevkov.tgbottest.application.command.response.TextResponse;
 import org.pl.pcz.yevkov.tgbottest.dto.event.ChatMessageReceivedDto;
-import org.pl.pcz.yevkov.tgbottest.dto.message.SendMessageDto;
 import org.pl.pcz.yevkov.tgbottest.model.vo.ChatId;
 import org.pl.pcz.yevkov.tgbottest.model.vo.UserId;
 import org.springframework.stereotype.Component;
@@ -22,32 +24,26 @@ import java.util.Optional;
 public class CommandDispatcher {
     private final BotCommandProvider botCommandProvider;
     private final CommandPermissionChecker commandPermissionChecker;
-    private final MessageDtoFactory messageDtoFactory;
+    private final CommandExecutor commandExecutor;
+    private final CommandErrorHandler commandErrorHandler;
+    private final CommandExtractor commandExtractor;
 
-    public Optional<SendMessageDto> handle(@NonNull ChatMessageReceivedDto receivedMessage) {
+
+    public Optional<TextResponse> handle(@NonNull ChatMessageReceivedDto receivedMessage) {
         if (receivedMessage.text().isEmpty()) {
-            log.debug("received text message is empty or null {}", receivedMessage);
-            var sendMessage = messageDtoFactory.generateMessage(
-                    receivedMessage,
-                    "input message or text is Empty");
-            return Optional.of(sendMessage);
+            return commandErrorHandler.handleEmptyMessage(receivedMessage);
         }
 
         ChatId chatId = receivedMessage.chatId();
         UserId userId = receivedMessage.userId();
-        String command = extractCommand(receivedMessage.text());
+        String command = commandExtractor.extract(receivedMessage.text());
 
         log.info("Received command: '{}' from {} in {}", command, userId, chatId);
 
         var registeredCommandOptional = botCommandProvider.getRegisteredCommand(command);
 
         if (registeredCommandOptional.isEmpty()) {
-            log.debug("Unknown command received: {} from {} in {}", command, userId, chatId);
-            var sendMessage = messageDtoFactory.generateMessage(
-                    receivedMessage,
-                    "Unknown command: " + command
-            );
-            return Optional.of(sendMessage);
+            return commandErrorHandler.handleUnknownCommand(receivedMessage, command);
         }
         try {
             var registeredCommand = registeredCommandOptional.get();
@@ -56,37 +52,19 @@ public class CommandDispatcher {
                     command, method.getName(), registeredCommand.handler().getClass().getSimpleName());
             CommandAccessResult access = commandPermissionChecker.hasAccess(receivedMessage, registeredCommand);
             if (!access.allowed()) {
-                log.debug("Command '{}' access denied by {} for userId={} in chatId={}",
-                        command, access.reason(), userId, chatId);
-                var sendMessage = messageDtoFactory.generateMessage(
-                        receivedMessage,
-                        access.reason()
-                );
-                return Optional.of(sendMessage);
+                return commandErrorHandler.handleAccessDenied(receivedMessage, access, command);
             }
 
             log.info("Dispatching command: '{}' for userId={} in chatId={}", command, userId, chatId);
-            // Can be null, if return methods type is void
-            Object result = method.invoke(registeredCommand.handler(), receivedMessage);
-            return Optional.ofNullable((SendMessageDto) result);
+
+            return commandExecutor.execute(registeredCommand, receivedMessage);
         } catch (Exception e) {
-            log.error("Error while processing command '{}' for userId={} in chatId={}: {}",
-                    command, userId, chatId, e.getMessage(), e);
-            var sendText = "Error while processing command: " + command + " Error: " + e.getMessage();
-            var sendMessage = messageDtoFactory.generateMessage(
-                    receivedMessage,
-                    sendText
-            );
-            return Optional.of(sendMessage);
+            return commandErrorHandler.handleExecutionError(receivedMessage, command, e);
         }
     }
 
     public boolean isCommandAllowed(@NonNull String text) {
-        String command = extractCommand(text);
+        String command = commandExtractor.extract(text);
         return botCommandProvider.getRegisteredCommand(command).isPresent();
-    }
-
-    private String extractCommand(@NonNull String text) {
-        return text.split(" ")[0].split("@")[0];
     }
 }

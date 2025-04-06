@@ -20,12 +20,13 @@ public class UserChatReadMapper implements Mapper<UserChat, UserChatReadDto> {
     public UserChatReadDto mapFrom(UserChat userChat) {
         UserReadDto userReadDto = userReadMapper.mapFrom(userChat.getUser());
         ChatReadDto chatReadDto = chatReadMapper.mapFrom(userChat.getChat());
-        return new UserChatReadDto(
-                userChat.getId(),
-                userChat.getUserRole(),
-                userChat.getRemainingTokens(),
-                chatReadDto,
-                userReadDto
-        );
+
+        return UserChatReadDto.builder()
+                .id(userChat.getId())
+                .userRole(userChat.getUserRole())
+                .remainingTokens(userChat.getRemainingTokens())
+                .chatReadDto(chatReadDto)
+                .userReadDto(userReadDto)
+                .build();
     }
 }

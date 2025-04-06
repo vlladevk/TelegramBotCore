@@ -10,7 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChatReadMapper implements Mapper<Chat, ChatReadDto> {
     @Override
-    public ChatReadDto mapFrom(@NonNull Chat object) {
-        return new ChatReadDto(new ChatId(object.getId()), object.getTitle(), object.getHourLimit(), object.getChatStatus());
+    public ChatReadDto mapFrom(@NonNull Chat entity) {
+        return ChatReadDto.builder()
+                .id(new ChatId(entity.getId()))
+                .title(entity.getTitle())
+                .hourLimit(entity.getHourLimit())
+                .chatStatus(entity.getChatStatus())
+                .build();
     }
 }

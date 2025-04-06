@@ -31,13 +31,14 @@ public class ChatMemberJoinedMapperEvent implements BotEventBulkMapper<Update, C
         String chatTitle = update.getMessage().getChat().getTitle();
 
         return update.getMessage().getNewChatMembers().stream()
-                .map(user -> new ChatMemberJoinedDto(
-                        chatId,
-                        new UserId(user.getId()),
-                        user.getUserName(),
-                        user.getFirstName(),
-                        chatTitle
-                ))
+                .map(user -> ChatMemberJoinedDto.builder()
+                        .chatId(chatId)
+                        .userId(new UserId(user.getId()))
+                        .username(user.getUserName())
+                        .firstName(user.getFirstName())
+                        .chatTitle(chatTitle)
+                        .build()
+                )
                 .collect(Collectors.toList());
     }
 }
