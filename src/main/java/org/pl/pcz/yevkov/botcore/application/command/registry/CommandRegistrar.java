@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.pl.pcz.yevkov.botcore.infrastructure.bot.adapter.BotApiAdapter;
 import org.pl.pcz.yevkov.botcore.infrastructure.bot.exception.BotApiException;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -18,7 +18,7 @@ import java.util.List;
  * to the Telegram platform during application startup.
  *
  * <p>
- * This component listens for the Spring {@link ContextRefreshedEvent} and
+ * This component listens for the Spring {@link ApplicationReadyEvent} and
  * pushes all registered {@link RegisteredCommand} instances (marked with
  * {@code showInMenu=true}) to Telegram using {@link BotApiAdapter}.
  * </p>
@@ -46,10 +46,10 @@ public class CommandRegistrar {
      *
      * @throws RuntimeException if command registration with Telegram fails
      */
-    @EventListener(ContextRefreshedEvent.class)
+    @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
         try {
-            log.info("Registering {} Telegram commands...", commandCatalog.getAllRegisteredCommands()
+            log.info("Registering {} Telegram commands in bot's menu", commandCatalog.getAllRegisteredCommands()
                     .stream().filter(RegisteredCommand::showInMenu).count());
             List<BotCommand> commands = commandCatalog.getAllRegisteredCommands().stream()
                     .filter(RegisteredCommand::showInMenu)

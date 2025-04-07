@@ -46,7 +46,7 @@ public class BotCommandCatalog implements BotCommandRegistrar, BotCommandProvide
 
         registeredCommandsMap.put(commandName, command);
 
-        log.info("Registered command: {} → {}.{}()",
+        log.debug("Registered command: {} → {}.{}()",
                 commandName,
                 handler.getClass().getSimpleName(),
                 method.getName());

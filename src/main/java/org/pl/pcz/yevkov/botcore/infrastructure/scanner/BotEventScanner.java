@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Scans the classpath for classes annotated with {@link BotEventBinding} that implement {@link BotEvent}.
  * It uses {@link Reflections} for runtime classpath scanning, enabling dynamic event discovery without manual registration.
- * This allows bot events to be registered flexibly and modularly, without requiring them to be Spring beans.
+ * This allows bot events to be registered flexibly and modularity, without requiring them to be Spring beans.
  *
  * <p><b>Why use both annotation and interface checks?</b></p>
  * <ul>
