@@ -8,12 +8,18 @@
 
 ---
 
-## 🚀 Overview
+## 🧱 Overview
 
 TelegramBotCore is built around the principles of **modularity**, **scalability**, and **extensibility**. It uses annotations, component scanning, and selective reflection to automatically register commands and events.
 
-You can focus on domain-specific logic — the engine takes care of:
+### Out of the box, it acts as:
+- ✅ a command-handling engine
+- 🚫 a spam prevention system for group chats
+- 🔐 a role-based access gate
+- 🔄 a token limiter for message frequency control
 
+
+### You can focus on domain-specific logic — the engine takes care of:
 - Command dispatching  
 - Role-based access control  
 - Event transformation and dispatch  
@@ -23,14 +29,28 @@ You can focus on domain-specific logic — the engine takes care of:
 Extension points allow you to inject custom event processors, permission strategies, or command logic with minimal friction.
 
 ---
+## 📦 Out-of-the-Box Behavior
+Without writing any custom logic, **TelegramBotCore** already provides:
+
+| Feature                         | Description                                                                 |
+|---------------------------------|-----------------------------------------------------------------------------|
+| 🛡️ Anti-Spam Filtering          | Automatically deletes group messages if a user exceeds their hourly token limit |
+| 🔄 Token Refresh Scheduler      | Resets tokens hourly per user (customizable)                                |
+| 🔐 Role-Based Command Access    | Limits access to commands like `/add_tokens`, `/remove_admin`, etc.         |
+| 📋 Built-in Commands            | Includes `/help`, `/registration_chat`, `/add_tokens`, `/remaining_tokens` and more |
+| 🤖 Auto User & Chat Registration| Detects new users/messages and stores them automatically                    |
+| 🧩 Easy Extension               | Add new commands and events with minimal setup                              |
+
+---
+
 
 ## 🔑 Key Highlights
 
 - **Annotation-Driven Commands** — easily define and organize bot commands.  
-- **Role-Based Access Control** — granular control over command execution.  
+- **Role-Based Access Control** — granular control over command execution.
+- **Spam Prevention with Token Limits** — restricts message flow in group chats
 - **Automatic Handler Registration** — no boilerplate for command and event binding.  
 - **Event Mapping System** — turn Telegram updates into domain events.  
-- **Token-Based Message Limiter** — prevents spam in group chats.  
 - **Telegram Adapter Layer** — abstracts raw TelegramBot API calls.  
 - **Structured Logging** — detailed logs aid development and maintenance.
 
@@ -144,16 +164,27 @@ bot:
 ---
 
 ## 📦 Build & Run
+
+To get started quickly, follow these steps:
+
+### 1. Clone the repository
+```bash
 git clone git@github.com:vlladevk/TelegramBotCore.git
 cd TelegramBotCore
-
+```
+### 2. Build the project using Maven
+```bash
 mvn clean install
 mvn spring-boot:run
-
-### Or run as a packaged JAR:
-
+```
+### 3. Run the bot in development mode
+```bash
+mvn spring-boot:run
+```
+### Or run it as a packaged JAR
+```bash
 java -jar target/TelegramBotCore.jar
-
+```
 ---
 
 ## 🧯 Use Cases / Example Extensions
