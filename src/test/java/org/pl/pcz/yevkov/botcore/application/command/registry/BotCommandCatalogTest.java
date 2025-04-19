@@ -59,10 +59,8 @@ class BotCommandCatalogTest {
 
         RegisteredCommand command = createMockCommand("test", method1, handler);
 
-        Mockito.when(commandFactory.create(handler, method1)).thenReturn(command);
-        Mockito.when(commandFactory.create(handler, method2)).thenReturn(command);
-        Mockito.doNothing().when(signatureValidator).validate(method1);
-        Mockito.doNothing().when(signatureValidator).validate(method2);
+        prepareMocking(handler, method1, command);
+        prepareMocking(handler, method2, command);
 
         catalog.registerCommand(handler, method1);
 
@@ -101,10 +99,8 @@ class BotCommandCatalogTest {
         RegisteredCommand command1 = createMockCommand("test1", method1, handler);
         RegisteredCommand command2 = createMockCommand("test2", method2, handler);
 
-        Mockito.when(commandFactory.create(handler, method1)).thenReturn(command1);
-        Mockito.when(commandFactory.create(handler, method2)).thenReturn(command2);
-        Mockito.doNothing().when(signatureValidator).validate(method1);
-        Mockito.doNothing().when(signatureValidator).validate(method2);
+        prepareMocking(handler, method1, command1);
+        prepareMocking(handler, method2, command2);
 
         catalog.registerCommand(handler, method1);
         catalog.registerCommand(handler, method2);
