@@ -5,8 +5,10 @@ import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
+@EnableScheduling
 public class ReflectionScannerConfig {
     @Bean
     public Reflections reflections() {
