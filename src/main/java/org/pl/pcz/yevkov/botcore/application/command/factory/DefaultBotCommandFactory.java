@@ -38,7 +38,7 @@ public class DefaultBotCommandFactory implements BotCommandFactory {
                 .method(method)
                 .build();
 
-        log.info("Registered bot command: {} from {}#{} (role={}, chats={})",
+        log.debug("Registered bot command: {} from {}#{} (role={}, chats={})",
                 registeredCommand.name(),
                 handler.getClass().getSimpleName(),
                 method.getName(),
@@ -51,13 +51,7 @@ public class DefaultBotCommandFactory implements BotCommandFactory {
 
     /**
      * Converts a camelCase Java method name into a snake_case command name.
-     *
-     * <p>
      * Example: {@code startBot → start_bot}
-     * </p>
-     *
-     * @param name the original method name
-     * @return the converted command name in snake_case
      */
     private String processMethodName(String name) {
         return name.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();

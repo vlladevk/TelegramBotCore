@@ -31,7 +31,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(@NonNull Update update) {
-        log.info("Received update: {}", update);
+        log.debug("Received update: {}", update);
         try {
            var events =  botEventDispatcher.handle(update);
            for (var event : events) {
