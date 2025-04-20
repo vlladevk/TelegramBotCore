@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultBotCommandFactoryTest {
@@ -29,8 +30,7 @@ class DefaultBotCommandFactoryTest {
 
         @BotCommand(name = "/explicit", description = "explicit name", showInMenu = false, userRole = UserRole.USER,
                 chatTypes = {ChatType.PRIVATE})
-        public void command() {
-        }
+        public void command() {}
     }
 
     @Mock
@@ -75,10 +75,18 @@ class DefaultBotCommandFactoryTest {
 
     @ParameterizedTest
     @MethodSource("provideCommands")
-    void create(Object handler, Method method, RegisteredCommand expectedResult) {
+    void create_validCommand_returnsExpectedResult(Object handler, Method method, RegisteredCommand expectedResult) {
         RegisteredCommand command = factory.create(handler, method);
         assertEquals(expectedResult, command);
         Mockito.verify(signatureValidator, Mockito.times(1)).validate(handler, method);
     }
 
+    @ParameterizedTest
+    @MethodSource("provideCommands")
+    void create_invalidSignature_throwsException(Object handler, Method method) {
+        Mockito.doThrow(new IllegalStateException("Invalid signature"))
+                .when(signatureValidator).validate(handler, method);
+
+        assertThrows(IllegalStateException.class, () -> factory.create(handler, method));
+    }
 }
