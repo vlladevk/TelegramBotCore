@@ -1,9 +1,11 @@
 package org.pl.pcz.yevkov.botcore.application.command.factory;
 
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.pl.pcz.yevkov.botcore.annotation.BotCommand;
 import org.pl.pcz.yevkov.botcore.application.command.registry.RegisteredCommand;
+import org.pl.pcz.yevkov.botcore.application.command.validation.CommandSignatureValidator;
 import org.pl.pcz.yevkov.botcore.domain.entity.ChatType;
 import org.pl.pcz.yevkov.botcore.domain.entity.UserRole;
 import org.springframework.stereotype.Component;
@@ -13,13 +15,15 @@ import java.util.Arrays;
 
 @Log4j2
 @Component
+@RequiredArgsConstructor
 public class DefaultBotCommandFactory implements BotCommandFactory {
+    private final CommandSignatureValidator signatureValidator;
 
     @Override
     public RegisteredCommand create(@NonNull Object handler, @NonNull Method method) {
-        BotCommand annotation = method.getAnnotation(BotCommand.class);
+        signatureValidator.validate(handler, method);
 
-        assert annotation != null;
+        BotCommand annotation = method.getAnnotation(BotCommand.class);
 
         String name = annotation.name().isEmpty()
                 ? "/" + processMethodName(method.getName())

@@ -8,7 +8,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pl.pcz.yevkov.botcore.application.command.exception.DuplicateCommandRegistrationException;
 import org.pl.pcz.yevkov.botcore.application.command.factory.BotCommandFactory;
-import org.pl.pcz.yevkov.botcore.application.command.validation.CommandSignatureValidator;
 import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
 import org.pl.pcz.yevkov.botcore.domain.entity.ChatType;
 import org.pl.pcz.yevkov.botcore.domain.entity.UserRole;
@@ -20,8 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class BotCommandCatalogTest {
-    @Mock
-    private CommandSignatureValidator signatureValidator;
 
     @Mock
     private BotCommandFactory commandFactory;
@@ -49,41 +46,24 @@ class BotCommandCatalogTest {
         assertTrue(result.isPresent());
         assertEquals(command, result.get());
 
-        Mockito.verify(signatureValidator).validate(method);
         Mockito.verify(commandFactory).create(handler, method);
     }
 
     @Test
-    void registerCommand_throwsExceptionOnDuplicateName() throws NoSuchMethodException {
+    void registerCommand_detectsDuplicateByName() throws Exception {
         Object handler = new DummyController();
-        Method method1 = getHandlerMethod("testCommand1");
-        Method method2 = getHandlerMethod("testCommand2");
+        Method m1 = getHandlerMethod("testCommand1");
+        Method m2 = getHandlerMethod("testCommand2");
 
-        RegisteredCommand command = createMockCommand("test", method1, handler);
+        RegisteredCommand c1 = createMockCommand("dup", m1, handler);
+        RegisteredCommand c2 = createMockCommand("dup", m2, handler);
 
-        prepareMocking(handler, method1, command);
-        prepareMocking(handler, method2, command);
+        prepareMocking(handler, m1, c1);
+        prepareMocking(handler, m2, c2);
 
-        catalog.registerCommand(handler, method1);
-
-        assertThrows(DuplicateCommandRegistrationException.class, () ->
-                catalog.registerCommand(handler, method2));
-
-        Mockito.verify(signatureValidator, Mockito.times(1)).validate(method1);
-        Mockito.verify(signatureValidator, Mockito.times(1)).validate(method2);
-
-        Mockito.verify(commandFactory, Mockito.times(1)).create(handler, method1);
-        Mockito.verify(commandFactory, Mockito.times(1)).create(handler, method2);
-    }
-
-    @Test
-    void registerCommand_throwsOnInvalidSignature() throws NoSuchMethodException {
-        Object handler = new DummyController();
-        Method method = getHandlerMethod("testCommand1");
-
-        Mockito.doThrow(new IllegalArgumentException("Invalid")).when(signatureValidator).validate(method);
-
-        assertThrows(IllegalArgumentException.class, () -> catalog.registerCommand(handler, method));
+        catalog.registerCommand(handler, m1);
+        assertThrows(DuplicateCommandRegistrationException.class,
+                () -> catalog.registerCommand(handler, m2));
     }
 
     @Test
@@ -121,13 +101,12 @@ class BotCommandCatalogTest {
                 .handler(handler)
                 .method(method)
                 .userRole(UserRole.USER)
-                .chatTypes( List.of(ChatType.GROUP, ChatType.PRIVATE))
+                .chatTypes(List.of(ChatType.GROUP, ChatType.PRIVATE))
                 .showInMenu(true)
                 .build();
     }
 
     private void prepareMocking(Object handler, Method method, RegisteredCommand command) {
-        Mockito.doNothing().when(signatureValidator).validate(method);
         Mockito.when(commandFactory.create(handler, method)).thenReturn(command);
     }
 

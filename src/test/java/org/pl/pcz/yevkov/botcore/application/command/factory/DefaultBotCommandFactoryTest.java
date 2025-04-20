@@ -1,11 +1,16 @@
 package org.pl.pcz.yevkov.botcore.application.command.factory;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.pl.pcz.yevkov.botcore.annotation.BotCommand;
 import org.pl.pcz.yevkov.botcore.application.command.registry.RegisteredCommand;
+import org.pl.pcz.yevkov.botcore.application.command.validation.CommandSignatureValidator;
 import org.pl.pcz.yevkov.botcore.domain.entity.ChatType;
 import org.pl.pcz.yevkov.botcore.domain.entity.UserRole;
 
@@ -13,21 +18,26 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(MockitoExtension.class)
 class DefaultBotCommandFactoryTest {
     static class DummyController {
         @BotCommand(description = "desc", userRole = UserRole.CHAT_ADMIN, chatTypes = {ChatType.GROUP})
-        public void someCommand() {}
+        public void someCommand() {
+        }
 
         @BotCommand(name = "/explicit", description = "explicit name", showInMenu = false, userRole = UserRole.USER,
                 chatTypes = {ChatType.PRIVATE})
-        public void command() {}
-
-        public void method() {}
+        public void command() {
+        }
     }
 
-    private final DefaultBotCommandFactory factory = new DefaultBotCommandFactory();
+    @Mock
+    private CommandSignatureValidator signatureValidator;
+
+    @InjectMocks
+    private DefaultBotCommandFactory factory;
 
     static Stream<Arguments> provideCommands() throws NoSuchMethodException {
         DummyController handler = new DummyController();
@@ -68,12 +78,7 @@ class DefaultBotCommandFactoryTest {
     void create(Object handler, Method method, RegisteredCommand expectedResult) {
         RegisteredCommand command = factory.create(handler, method);
         assertEquals(expectedResult, command);
+        Mockito.verify(signatureValidator, Mockito.times(1)).validate(handler, method);
     }
 
-    @Test
-    void create_withOutAnnotationBotCommand() throws NoSuchMethodException {
-        DummyController handler = new DummyController();
-        Method method1 = DummyController.class.getDeclaredMethod("method");
-        assertThrows(AssertionError.class, () -> factory.create(handler, method1));
-    }
 }

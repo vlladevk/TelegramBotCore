@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.pl.pcz.yevkov.botcore.application.command.exception.DuplicateCommandRegistrationException;
 import org.pl.pcz.yevkov.botcore.application.command.factory.BotCommandFactory;
-import org.pl.pcz.yevkov.botcore.application.command.validation.CommandSignatureValidator;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -26,15 +25,12 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class BotCommandCatalog implements BotCommandRegistrar, BotCommandProvider {
-
-    private final CommandSignatureValidator signatureValidator;
     private final BotCommandFactory commandFactory;
     private final Map<String, RegisteredCommand> registeredCommandsMap = new LinkedHashMap<>();
 
 
     @Override
     public void registerCommand(@NonNull Object handler, @NonNull Method method) {
-        signatureValidator.validate(method);
         var command = commandFactory.create(handler, method);
         var commandName = command.name();
 

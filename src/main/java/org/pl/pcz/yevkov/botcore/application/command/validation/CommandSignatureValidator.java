@@ -8,21 +8,17 @@ import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
 import java.lang.reflect.Method;
 
 /**
- * Validates the signature of methods annotated with {@link BotCommand}.
- *
- * <p>
- * This validator ensures that the annotated method adheres to the following requirements:
- * </p>
+ * Validates that a given {@link BotCommand}-annotated method:
  * <ul>
- *   <li>It must have exactly one parameter of type {@link ChatMessageReceivedDto}</li>
- *   <li>The return type must be either {@link TextResponse} or {@code void}</li>
+ *   <li>Belongs to the specified {@code handler}</li>
+ *   <li>Has one {@link ChatMessageReceivedDto} parameter</li>
+ *   <li>returns {@link TextResponse} or {@code void}</li>
  * </ul>
  *
  * <p>
- * Methods that do not meet these criteria will trigger an {@link IllegalStateException}.
- * This validation is performed at the time of registration during the bot's startup.
+ * Fails with {@link IllegalStateException} if any rule is violated.
  * </p>
  */
 public interface CommandSignatureValidator {
-    void validate(@NonNull Method method);
+    void validate(@NonNull Object handler, @NonNull Method method);
 }
