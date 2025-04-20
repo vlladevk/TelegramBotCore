@@ -17,6 +17,7 @@ public class BotCommandSignatureValidator implements CommandSignatureValidator {
         validateHandlerConsistency(handler, method);
         validateParameterSignature(method);
         validateReturnType(method);
+        validateAnnotationPresent(method);
     }
 
     // Ensures the method belongs to the handler's class hierarchy.
@@ -42,6 +43,14 @@ public class BotCommandSignatureValidator implements CommandSignatureValidator {
         if (!TextResponse.class.equals(returnType) && !void.class.equals(returnType)) {
             throw new IllegalStateException("@" + BotCommand.class.getSimpleName() +
                     " method '" + method.getName() + "' must return either TextResponse or void");
+        }
+    }
+
+    // Ensures the method is annotated with @BotCommand.
+    private void validateAnnotationPresent(Method method) {
+        if (!method.isAnnotationPresent(BotCommand.class)) {
+            throw new IllegalStateException("Method " + method.getName() +
+                    " must be annotated with @BotCommand");
         }
     }
 }
