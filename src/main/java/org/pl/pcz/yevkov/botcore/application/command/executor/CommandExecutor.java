@@ -7,9 +7,7 @@ import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
 
 import java.util.Optional;
 
-/**
- * Defines a contract for invoking the underlying logic of a registered bot command.
- */
+
 public interface CommandExecutor {
     Optional<TextResponse> execute(@NonNull RegisteredCommand command, @NonNull ChatMessageReceivedDto input);
 }

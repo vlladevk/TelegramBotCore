@@ -13,24 +13,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-/**
- * Default implementation of {@link CommandExecutor} that uses Java Reflection
- * to invoke command handler methods.
- * <p>
- * If the method returns {@code null}, the result is treated as an empty optional.
- * If the method returns an invalid type, an exception is raised.
- * </p>
- */
+
 @Log4j2
 @Component
 @RequiredArgsConstructor
 public class ReflectionBasedCommandExecutor implements CommandExecutor {
 
-    /**
-     * Executes the provided command by invoking its method using reflection.
-     * @return an optional {@link TextResponse} returned by the method
-     * @throws CommandExecutionException if invocation fails or the method returns an invalid type
-     */
     @Override
     public Optional<TextResponse> execute(@NonNull RegisteredCommand command, @NonNull ChatMessageReceivedDto input) {
         Method method = command.method();
@@ -40,7 +28,7 @@ public class ReflectionBasedCommandExecutor implements CommandExecutor {
             Object result = method.invoke(handler, input);
             return validateResult(result, method);
         } catch (InvocationTargetException e) {
-            throw wrapException(e.getTargetException(), method);
+            throw  new CommandExecutionException("Error while executing command method: " + method.getName(), e);
         } catch (Exception e) {
             throw new CommandExecutionException("Unexpected error during method invocation: " + method.getName(), e);
         }
@@ -59,10 +47,5 @@ public class ReflectionBasedCommandExecutor implements CommandExecutor {
         throw new CommandExecutionException("Invalid return type from method '" +
                 method.getName() + "'. Expected TextResponse, but got " +
                 result.getClass().getSimpleName());
-    }
-
-
-    private CommandExecutionException wrapException(Throwable t, Method method) {
-        return new CommandExecutionException("Error while executing command method: " + method.getName(), t);
     }
 }
