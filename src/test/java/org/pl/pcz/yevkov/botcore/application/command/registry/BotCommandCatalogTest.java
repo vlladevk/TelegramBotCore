@@ -14,6 +14,8 @@ import org.pl.pcz.yevkov.botcore.domain.entity.ChatType;
 import org.pl.pcz.yevkov.botcore.domain.entity.UserRole;
 
 import java.lang.reflect.Method;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -119,7 +121,7 @@ class BotCommandCatalogTest {
                 .handler(handler)
                 .method(method)
                 .userRole(UserRole.USER)
-                .chatTypes(new ChatType[]{ChatType.GROUP, ChatType.PRIVATE})
+                .chatTypes( List.of(ChatType.GROUP, ChatType.PRIVATE))
                 .showInMenu(true)
                 .build();
     }

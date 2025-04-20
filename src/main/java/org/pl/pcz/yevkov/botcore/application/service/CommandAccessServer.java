@@ -11,8 +11,6 @@ import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
 import org.pl.pcz.yevkov.botcore.domain.vo.UserId;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +20,7 @@ public class CommandAccessServer implements CommandPermissionChecker {
     @Override
     public CommandAccessResult hasAccess(@NonNull ChatMessageReceivedDto receivedMessage, @NonNull RegisteredCommand command) {
         ChatType chatType = receivedMessage.chatType();
-        if (!List.of(command.chatTypes()).contains(chatType)) {
+        if (!command.chatTypes().contains(chatType)) {
             return new CommandAccessResult(false, "This command cannot be used in " + chatType.name().toLowerCase() + " chats.");
         }
         ChatId chatId = receivedMessage.chatId();

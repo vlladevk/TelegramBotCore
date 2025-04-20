@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-
 @Log4j2
 @Component
 public class DefaultBotCommandFactory implements BotCommandFactory {
@@ -19,6 +18,8 @@ public class DefaultBotCommandFactory implements BotCommandFactory {
     @Override
     public RegisteredCommand create(@NonNull Object handler, @NonNull Method method) {
         BotCommand annotation = method.getAnnotation(BotCommand.class);
+
+        assert annotation != null;
 
         String name = annotation.name().isEmpty()
                 ? "/" + processMethodName(method.getName())
@@ -33,7 +34,7 @@ public class DefaultBotCommandFactory implements BotCommandFactory {
                 .description(description)
                 .showInMenu(showInMenu)
                 .userRole(userRole)
-                .chatTypes(chatTypes)
+                .chatTypes(Arrays.asList(chatTypes))
                 .handler(handler)
                 .method(method)
                 .build();

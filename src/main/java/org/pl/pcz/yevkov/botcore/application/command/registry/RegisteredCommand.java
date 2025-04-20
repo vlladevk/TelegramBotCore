@@ -7,6 +7,7 @@ import org.pl.pcz.yevkov.botcore.domain.entity.ChatType;
 import org.pl.pcz.yevkov.botcore.domain.entity.UserRole;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 
 @Builder
@@ -15,7 +16,7 @@ public record RegisteredCommand(
         @NotNull String description,
         boolean showInMenu,
         @NotNull UserRole userRole,
-        @NotNull ChatType[] chatTypes,
+        @NotNull List<ChatType> chatTypes,
         @NotNull Object handler,
         @NotNull Method method
 ) {

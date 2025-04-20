@@ -95,7 +95,7 @@ class CommandRegistrarTest {
                 .handler(handler)
                 .method(method)
                 .userRole(UserRole.USER)
-                .chatTypes(new ChatType[]{ChatType.GROUP, ChatType.PRIVATE})
+                .chatTypes(List.of(ChatType.GROUP, ChatType.PRIVATE))
                 .showInMenu(isShowInMenu)
                 .build();
     }
