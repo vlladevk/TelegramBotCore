@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefaultBotEventFactory implements BotEventFactory {
 
-
     @Override
     public RegisteredEvent create(@NonNull Class<? extends BotEvent> eventClass) {
         // Ensure event is annotated properly
