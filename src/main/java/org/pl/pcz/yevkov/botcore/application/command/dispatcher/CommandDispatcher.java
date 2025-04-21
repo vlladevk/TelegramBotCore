@@ -28,12 +28,6 @@ public class CommandDispatcher {
     private final CommandErrorHandler commandErrorHandler;
     private final CommandExtractor commandExtractor;
 
-
-    public Optional<TextResponse> handle(@NonNull ChatMessageReceivedDto message) {
-        return dispatch(message);
-    }
-
-
     public Optional<TextResponse> dispatch(@NonNull ChatMessageReceivedDto message) {
         if (isTextEmpty(message)) {
             return commandErrorHandler.handleEmptyMessage(message);
