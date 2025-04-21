@@ -20,12 +20,6 @@ public class BotEventCatalog implements BotEventRegistrar, BotEventProvider {
     private final BotEventFactory botEventFactory;
     private final Map<Class<? extends EventDto>, RegisteredEvent> registeredEventsMap = new HashMap<>();
 
-    /**
-     * Registers a {@link BotEvent} class and binds it to its declared {@link EventDto} type.
-     *
-     * @param eventClass the {@link BotEvent} implementation to register
-     * @throws DuplicateEventRegistrationException if the {@link EventDto} type is already registered
-     */
     @Override
     public void registerEvent(@NonNull Class<? extends BotEvent> eventClass) {
         var registeredEvent = botEventFactory.create(eventClass);
@@ -40,12 +34,6 @@ public class BotEventCatalog implements BotEventRegistrar, BotEventProvider {
         registeredEventsMap.put(dtoClass, registeredEvent);
     }
 
-    /**
-     * Retrieves the registered event metadata for the specified {@link EventDto} type.
-     *
-     * @param dtoEventClass the class of the {@link EventDto} to look up
-     * @return an {@link Optional} containing the {@link RegisteredEvent}, or empty if not found
-     */
     @Override
     public Optional<RegisteredEvent> getRegisteredEvent(@NonNull Class<? extends EventDto> dtoEventClass) {
         return Optional.ofNullable(registeredEventsMap.get(dtoEventClass));
