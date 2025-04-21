@@ -34,7 +34,7 @@ public class CommandDispatcher {
         }
 
         String command = commandExtractor.extract(message.text());
-        log.info("Received command: '{}' from {} in {}", command, message.userId(), message.chatId());
+        log.debug("Received command: '{}'", command);
 
         Optional<RegisteredCommand> commandOpt = botCommandProvider.getRegisteredCommand(command);
         if (commandOpt.isEmpty()) {
@@ -56,8 +56,8 @@ public class CommandDispatcher {
             log.debug("Executing command: '{}' via method {} on {}",
                     command, cmd.method().getName(), cmd.handler().getClass().getSimpleName());
 
-            log.info("Dispatching command: '{}' for userId={} in chatId={}",
-                    command, message.userId(), message.chatId());
+            log.debug("Dispatching command: '{}'",
+                    command);
 
             return commandExecutor.execute(cmd, message);
         } catch (CommandExecutionException e) {

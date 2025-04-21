@@ -35,7 +35,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
            var events =  botEventDispatcher.handle(update);
            for (var event : events) {
-               log.info("Event received: {}", event);
+               log.info("Event received: {}", event.getClass().getSimpleName());
            }
            events.forEach(publisher::publishEvent);
         } catch (Exception e) {

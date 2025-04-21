@@ -56,7 +56,7 @@ public class TokenController {
     }
 
 
-    @BotCommand(chatTypes = ChatType.GROUP, showInMenu = false, userRole = UserRole.CHAT_ADMIN,
+    @BotCommand(chatTypes = ChatType.GROUP, userRole = UserRole.CHAT_ADMIN,
             description = """
                     Adds tokens to a specific user.
                     Добавляет токены конкретному пользователю.

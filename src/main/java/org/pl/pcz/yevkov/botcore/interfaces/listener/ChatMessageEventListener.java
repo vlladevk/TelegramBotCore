@@ -28,9 +28,9 @@ public class ChatMessageEventListener {
     public void onTelegramUpdate(@NonNull ChatMessageReceivedEvent event) {
         ChatMessageReceivedDto receivedMessage = event.member();
         try {
+            userManagementService.ensureUserRegisteredInChat(receivedMessage);
             commandHandlingService.handleCommand(receivedMessage);
             tokenManagementService.handleNonCommandMessage(receivedMessage);
-            userManagementService.ensureUserRegisteredInChat(receivedMessage);
         } catch (BotApiException e) {
             log.error("Error processing message: {}", receivedMessage.text(), e);
         } catch (Exception e) {
