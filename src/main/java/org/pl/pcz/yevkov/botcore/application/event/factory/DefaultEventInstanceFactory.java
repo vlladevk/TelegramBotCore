@@ -18,7 +18,6 @@ public class DefaultEventInstanceFactory implements EventInstanceFactory {
 
     private final BotEventProvider botEventProvider;
 
-
     @Override
     public Optional<BotEvent> createEventInstance(@NonNull EventDto dto) {
         var registered = botEventProvider.getRegisteredEvent(dto.getClass());
