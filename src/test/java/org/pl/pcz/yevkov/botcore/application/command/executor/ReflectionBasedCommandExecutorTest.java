@@ -37,6 +37,7 @@ class ReflectionBasedCommandExecutorTest {
     void execute_validMethod_returnsResponse() throws Exception {
         var command = makeCommand("valid");
         ChatMessageReceivedDto dto = Mockito.mock(ChatMessageReceivedDto.class);
+
         var result = executor.execute(command, dto);
 
         assertTrue(result.isPresent());
@@ -65,7 +66,7 @@ class ReflectionBasedCommandExecutorTest {
         var command = makeCommand("throwsError");
         ChatMessageReceivedDto dto = Mockito.mock(ChatMessageReceivedDto.class);
 
-         assertThrows(CommandExecutionException.class, () -> executor.execute(command, dto));
+        assertThrows(CommandExecutionException.class, () -> executor.execute(command, dto));
     }
 
     private RegisteredCommand makeCommand(String methodName) throws NoSuchMethodException {

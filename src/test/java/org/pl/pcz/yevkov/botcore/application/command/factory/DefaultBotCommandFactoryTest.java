@@ -77,6 +77,7 @@ class DefaultBotCommandFactoryTest {
     @MethodSource("provideCommands")
     void create_validCommand_returnsExpectedResult(Object handler, Method method, RegisteredCommand expectedResult) {
         RegisteredCommand command = factory.create(handler, method);
+
         assertEquals(expectedResult, command);
         Mockito.verify(signatureValidator, Mockito.times(1)).validate(handler, method);
     }
