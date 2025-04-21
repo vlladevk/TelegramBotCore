@@ -29,14 +29,14 @@ public class CommandDispatcher {
     private final CommandExtractor commandExtractor;
 
     public Optional<TextResponse> dispatch(@NonNull ChatMessageReceivedDto message) {
-        if (isTextEmpty(message)) {
+        if (message.text().isEmpty()) {
             return commandErrorHandler.handleEmptyMessage(message);
         }
 
-        String command = extractCommand(message.text());
+        String command = commandExtractor.extract(message.text());
         log.info("Received command: '{}' from {} in {}", command, message.userId(), message.chatId());
 
-        Optional<RegisteredCommand> commandOpt = getRegisteredCommand(command);
+        Optional<RegisteredCommand> commandOpt = botCommandProvider.getRegisteredCommand(command);
         if (commandOpt.isEmpty()) {
             return commandErrorHandler.handleUnknownCommand(message, command);
         }
@@ -67,20 +67,5 @@ public class CommandDispatcher {
                     command, e.getMessage(), e);
             return commandErrorHandler.handleExecutionError(message, command, e);
         }
-    }
-
-
-    private boolean isTextEmpty(ChatMessageReceivedDto message) {
-        return message.text().isEmpty();
-    }
-
-
-    private String extractCommand(String text) {
-        return commandExtractor.extract(text);
-    }
-
-
-    private Optional<RegisteredCommand> getRegisteredCommand(String command) {
-        return botCommandProvider.getRegisteredCommand(command);
     }
 }
