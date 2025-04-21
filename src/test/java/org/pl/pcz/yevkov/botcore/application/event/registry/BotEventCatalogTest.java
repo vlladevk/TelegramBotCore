@@ -26,7 +26,7 @@ class BotEventCatalogTest {
     BotEventCatalog catalog;
 
     static class DummyEvent implements BotEvent {
-        public DummyEvent() {}
+        public DummyEvent(DummyDto ignore) {}
     }
     static class DummyDto implements EventDto {}
 
@@ -35,7 +35,7 @@ class BotEventCatalogTest {
 
         @Test
         void register_newEvent_registersSuccessfully() throws Exception {
-            Constructor<DummyEvent> ctor = DummyEvent.class.getConstructor();
+            Constructor<DummyEvent> ctor = DummyEvent.class.getConstructor(DummyDto.class);
             RegisteredEvent event = new RegisteredEvent(DummyDto.class, ctor);
             when(factory.create(DummyEvent.class)).thenReturn(event);
 
@@ -49,7 +49,7 @@ class BotEventCatalogTest {
 
         @Test
         void register_duplicateDto_throwsException() throws Exception {
-            Constructor<DummyEvent> ctor = DummyEvent.class.getConstructor();
+            Constructor<DummyEvent> ctor = DummyEvent.class.getConstructor(DummyDto.class);
             RegisteredEvent event = new RegisteredEvent(DummyDto.class, ctor);
             when(factory.create(DummyEvent.class)).thenReturn(event);
 
@@ -74,7 +74,7 @@ class BotEventCatalogTest {
 
         @Test
         void get_registered_returnsEvent() throws Exception {
-            Constructor<DummyEvent> ctor = DummyEvent.class.getConstructor();
+            Constructor<DummyEvent> ctor = DummyEvent.class.getConstructor(DummyDto.class);
             RegisteredEvent event = new RegisteredEvent(DummyDto.class, ctor);
             when(factory.create(DummyEvent.class)).thenReturn(event);
 
