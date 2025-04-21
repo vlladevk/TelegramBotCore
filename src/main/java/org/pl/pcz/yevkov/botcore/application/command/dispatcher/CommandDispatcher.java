@@ -30,7 +30,7 @@ public class CommandDispatcher {
 
     public Optional<TextResponse> dispatch(@NonNull ChatMessageReceivedDto message) {
         if (message.text().isEmpty()) {
-            return commandErrorHandler.handleEmptyMessage(message);
+            return Optional.of(commandErrorHandler.handleEmptyMessage(message));
         }
 
         String command = commandExtractor.extract(message.text());
@@ -38,13 +38,13 @@ public class CommandDispatcher {
 
         Optional<RegisteredCommand> commandOpt = botCommandProvider.getRegisteredCommand(command);
         if (commandOpt.isEmpty()) {
-            return commandErrorHandler.handleUnknownCommand(message, command);
+            return Optional.of(commandErrorHandler.handleUnknownCommand(message, command));
         }
 
         RegisteredCommand registeredCommand = commandOpt.get();
         CommandAccessResult access = commandPermissionChecker.hasAccess(message, registeredCommand);
         if (!access.allowed()) {
-            return commandErrorHandler.handleAccessDenied(message, access, command);
+            return Optional.of(commandErrorHandler.handleAccessDenied(message, access, command));
         }
 
         return executeCommand(message, command, registeredCommand);
@@ -61,11 +61,11 @@ public class CommandDispatcher {
 
             return commandExecutor.execute(cmd, message);
         } catch (CommandExecutionException e) {
-            return commandErrorHandler.handleExecutionError(message, command, e);
+            return Optional.of(commandErrorHandler.handleExecutionError(message, command, e));
         } catch (Exception e) {
             log.error("Unexpected error during dispatching of command '{}': {}",
                     command, e.getMessage(), e);
-            return commandErrorHandler.handleExecutionError(message, command, e);
+            return Optional.of(commandErrorHandler.handleExecutionError(message, command, e));
         }
     }
 }
