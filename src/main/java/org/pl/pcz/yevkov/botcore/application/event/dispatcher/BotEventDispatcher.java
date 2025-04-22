@@ -83,7 +83,7 @@ public class BotEventDispatcher {
         eventInstanceFactory.createEventInstance(dto).ifPresentOrElse(
                 event -> {
                     events.add(event);
-                    log.debug("Mapped event: {} from DTO: {}", event.getClass().getSimpleName(),
+                    log.debug("Mapped event: {} from DTO: {}", event.getEventName(),
                             dto.getClass().getSimpleName());
                 },
                 () -> log.warn("No registered event found for DTO: {}", dto.getClass().getName())
