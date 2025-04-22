@@ -13,8 +13,10 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.util.List;
+
 @Component
-public class ChatMessageReceivedMapper implements BotEventMapper<Update, ChatMessageReceivedDto> {
+public class ChatMessageReceivedDtoMapper implements UpdateToEventDtoMapper<Update, ChatMessageReceivedDto> {
 
     @Override
     public boolean supports(@NonNull Update update) {
@@ -22,7 +24,7 @@ public class ChatMessageReceivedMapper implements BotEventMapper<Update, ChatMes
     }
 
     @Override
-    public ChatMessageReceivedDto mapFrom(@NonNull Update update) {
+    public List<ChatMessageReceivedDto> mapFrom(@NonNull Update update) {
         if (!supports(update)) {
             throw new IllegalStateException("Update is not a ChatMessageReceived event");
         }
@@ -31,7 +33,7 @@ public class ChatMessageReceivedMapper implements BotEventMapper<Update, ChatMes
         Chat chat = message.getChat();
         User user = message.getFrom();
 
-        return ChatMessageReceivedDto.builder()
+        return List.of(ChatMessageReceivedDto.builder()
                 .chatId(new ChatId(chat.getId()))
                 .userId(new UserId(user.getId()))
                 .threadId(new ThreadId(message.getMessageThreadId()))
@@ -40,6 +42,6 @@ public class ChatMessageReceivedMapper implements BotEventMapper<Update, ChatMes
                 .firstName(user.getFirstName())
                 .text(message.getText() == null ? "" : message.getText().trim())
                 .chatType("private".equals(chat.getType()) ? ChatType.PRIVATE : ChatType.GROUP)
-                .build();
+                .build());
     }
 }

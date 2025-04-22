@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class ChatMemberJoinedMapperEvent implements BotEventBulkMapper<Update, ChatMemberJoinedDto> {
+public class ChatMemberJoinedMapperEvent implements UpdateToEventDtoMapper<Update, ChatMemberJoinedDto> {
     @Override
     public boolean supports(@NonNull Update update) {
         return update.hasMessage()
@@ -21,7 +21,7 @@ public class ChatMemberJoinedMapperEvent implements BotEventBulkMapper<Update, C
     }
 
     @Override
-    public List<ChatMemberJoinedDto> mapAll(@NonNull Update update) {
+    public List<ChatMemberJoinedDto> mapFrom(@NonNull Update update) {
         if (!supports(update)) {
             throw new IllegalStateException("Update is not a ChatMemberJoined event");
         }

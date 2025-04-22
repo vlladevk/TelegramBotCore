@@ -8,9 +8,11 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.util.List;
+
 
 @Component
-public class ChatMemberLeftMapper implements BotEventMapper<Update, ChatMemberLeftDto> {
+public class ChatMemberLeftDtoMapper implements UpdateToEventDtoMapper<Update, ChatMemberLeftDto> {
 
     @Override
     public boolean supports(@NonNull Update update) {
@@ -19,7 +21,7 @@ public class ChatMemberLeftMapper implements BotEventMapper<Update, ChatMemberLe
     }
 
     @Override
-    public ChatMemberLeftDto mapFrom(Update update) {
+    public List<ChatMemberLeftDto> mapFrom(@NonNull Update update) {
         if (!supports(update)) {
             throw new IllegalStateException("Update is not a ChatMemberLeft event");
         }
@@ -27,11 +29,11 @@ public class ChatMemberLeftMapper implements BotEventMapper<Update, ChatMemberLe
         var message = update.getMessage();
         User user = message.getLeftChatMember();
 
-        return ChatMemberLeftDto.builder()
+        return List.of(ChatMemberLeftDto.builder()
                 .chatId(new ChatId(message.getChatId()))
                 .userId(new UserId(user.getId()))
                 .username(user.getUserName())
                 .firstName(user.getFirstName())
-                .build();
+                .build());
     }
 }
