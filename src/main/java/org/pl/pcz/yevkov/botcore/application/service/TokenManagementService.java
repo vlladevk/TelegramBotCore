@@ -22,7 +22,6 @@ import java.util.Optional;
 @Log4j2
 public class TokenManagementService {
 
-
     private final UserChatService userChatService;
     private final MessageDeletionService messageDeletionService;
     private final BotApiAdapter telegramBot;
@@ -33,11 +32,12 @@ public class TokenManagementService {
         if (receivedMessage.chatType() == ChatType.PRIVATE) return;
 
         ChatId chatId = receivedMessage.chatId();
+
         UserId userId = receivedMessage.userId();
 
         Optional<UserChatReadDto> userChatOpt = userChatService.getUserChatBy(chatId, userId);
         if (userChatOpt.isEmpty()) {
-            log.error("UserChat not found for userId={} in chatId={}", userId, chatId);
+            log.warn("UserChat not found for userId={} in chatId={}", userId, chatId);
             return;
         }
 

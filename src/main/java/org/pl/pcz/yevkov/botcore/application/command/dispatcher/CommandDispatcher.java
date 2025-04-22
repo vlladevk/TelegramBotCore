@@ -13,6 +13,8 @@ import org.pl.pcz.yevkov.botcore.application.command.registry.BotCommandProvider
 import org.pl.pcz.yevkov.botcore.application.command.registry.RegisteredCommand;
 import org.pl.pcz.yevkov.botcore.application.command.response.TextResponse;
 import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
+import org.pl.pcz.yevkov.botcore.domain.event.UnrecognizedCommandEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -27,6 +29,7 @@ public class CommandDispatcher {
     private final CommandExecutor commandExecutor;
     private final CommandErrorHandler commandErrorHandler;
     private final CommandExtractor commandExtractor;
+    private final ApplicationEventPublisher publisher;
 
     public Optional<TextResponse> dispatch(@NonNull ChatMessageReceivedDto message) {
         if (message.text().isEmpty()) {
@@ -38,6 +41,7 @@ public class CommandDispatcher {
 
         Optional<RegisteredCommand> commandOpt = botCommandProvider.getRegisteredCommand(command);
         if (commandOpt.isEmpty()) {
+            publisher.publishEvent(new UnrecognizedCommandEvent(message));
             return Optional.of(commandErrorHandler.handleUnknownCommand(message, command));
         }
 

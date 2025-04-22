@@ -5,8 +5,12 @@ import org.pl.pcz.yevkov.botcore.annotation.BotEventBinding;
 import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
 
 @BotEventBinding(eventDto = ChatMessageReceivedDto.class)
-public record ChatMessageReceivedEvent(ChatMessageReceivedDto member) implements BotEvent {
-    public ChatMessageReceivedEvent(@NonNull ChatMessageReceivedDto member) {
-        this.member = member;
+public record ChatMessageReceivedEvent(ChatMessageReceivedDto message) implements BotEvent {
+    public ChatMessageReceivedEvent(@NonNull ChatMessageReceivedDto message) {
+        this.message = message;
+    }
+
+    public boolean isCommand() {
+        return message.text().trim().startsWith("/");
     }
 }

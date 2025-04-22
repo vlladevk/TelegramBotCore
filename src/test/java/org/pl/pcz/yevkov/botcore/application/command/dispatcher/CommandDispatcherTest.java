@@ -19,10 +19,12 @@ import org.pl.pcz.yevkov.botcore.application.command.registry.RegisteredCommand;
 import org.pl.pcz.yevkov.botcore.application.command.response.TextResponse;
 import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
 import org.pl.pcz.yevkov.botcore.domain.entity.ChatType;
+import org.pl.pcz.yevkov.botcore.domain.event.UnrecognizedCommandEvent;
 import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
 import org.pl.pcz.yevkov.botcore.domain.vo.MessageId;
 import org.pl.pcz.yevkov.botcore.domain.vo.ThreadId;
 import org.pl.pcz.yevkov.botcore.domain.vo.UserId;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -40,6 +42,7 @@ class CommandDispatcherTest {
     @Mock CommandExecutor executor;
     @Mock CommandErrorHandler error;
     @Mock CommandExtractor extractor;
+    @Mock ApplicationEventPublisher publisher;
 
     @InjectMocks CommandDispatcher dispatcher;
 
@@ -78,6 +81,7 @@ class CommandDispatcherTest {
 
             verify(error).handleEmptyMessage(m);
             verify(executor, never()).execute(any(), any());
+            verify(publisher, never()).publishEvent(new UnrecognizedCommandEvent(m));
         }
     }
 
@@ -94,6 +98,7 @@ class CommandDispatcherTest {
 
             verify(error).handleUnknownCommand(m, "oops");
             verify(executor, never()).execute(any(), any());
+            verify(publisher).publishEvent(new UnrecognizedCommandEvent(m));
         }
     }
 
@@ -114,6 +119,7 @@ class CommandDispatcherTest {
 
             verify(error).handleAccessDenied(m, denied, "test");
             verify(executor, never()).execute(any(), any());
+            verify(publisher, never()).publishEvent(new UnrecognizedCommandEvent(m));
         }
 
         @Test
@@ -130,6 +136,7 @@ class CommandDispatcherTest {
 
             verify(executor).execute(cmd, m);
             verify(error, never()).handleAccessDenied(any(), any(), any());
+            verify(publisher, never()).publishEvent(new UnrecognizedCommandEvent(m));
         }
 
         private void givenCommon(ChatMessageReceivedDto m, RegisteredCommand cmd) {
@@ -156,6 +163,7 @@ class CommandDispatcherTest {
             assertSame(ok, dispatcher.dispatch(m).orElseThrow());
 
             verify(error).handleExecutionError(m, "test", boom);
+            verify(publisher, never()).publishEvent(new UnrecognizedCommandEvent(m));
         }
 
         @Test
@@ -174,6 +182,7 @@ class CommandDispatcherTest {
             assertSame(ok, dispatcher.dispatch(m).orElseThrow());
 
             verify(error).handleExecutionError(m, "test", boom);
+            verify(publisher, never()).publishEvent(new UnrecognizedCommandEvent(m));
         }
     }
 }

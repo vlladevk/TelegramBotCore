@@ -47,7 +47,7 @@ public class UserChatService {
         if (userChatOptional.isPresent()) {
             log.debug("UserChat found for chatId={}, userId={}", chatId, userId);
         } else {
-            log.warn("UserChat not found for chatId={}, userId={}", chatId, userId);
+            log.debug("UserChat not found for chatId={}, userId={}", chatId, userId);
         }
         return userChatOptional.map(userChatReadMapper::mapFrom);
     }
@@ -59,7 +59,7 @@ public class UserChatService {
         if (userChatOptional.isPresent()) {
             var userChat = userChatOptional.get();
             userChat.setUserRole(userRole);
-            log.info("Updated role to {} for chatId={}, userId={}", userRole, chatId, userId);
+            log.debug("Updated role to {} for chatId={}, userId={}", userRole, chatId, userId);
         } else {
             log.warn("Cannot update role. UserChat not found. chatId={}, userId={}, role={}", chatId, userId, userRole);
         }
@@ -70,7 +70,7 @@ public class UserChatService {
         Optional<UserChat> userChatOptional = userChatRepository.findById(id);
         if (userChatOptional.isPresent()) {
             userChatUpdateMapper.updateFromDto(userChatUpdateDto, userChatOptional.get());
-            log.info("Updated UserChat with id={}", id);
+            log.debug("Updated UserChat with id={}", id);
         } else {
             log.warn("UserChat not found for id {} {}", id, userChatUpdateDto);
         }

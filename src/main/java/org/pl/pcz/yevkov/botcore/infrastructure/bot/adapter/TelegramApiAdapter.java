@@ -66,12 +66,12 @@ public class TelegramApiAdapter implements BotApiAdapter {
     @Override
     public ChatMemberInfo execute(@NonNull GetChatMemberRequest command) throws BotApiException {
         try {
-            log.debug("Getting chat member info for chatId={}, userId={}",
+            log.debug("Getting chat message info for chatId={}, userId={}",
                     command.chatId(), command.userId());
             var chatMember = telegramBot.execute(getChatMemberMapper.mapFrom(command));
             return chatMemberMapper.mapFrom(chatMember);
         } catch (TelegramApiException e) {
-            throw new BotApiException("Failed to get chat member info", e);
+            throw new BotApiException("Failed to get chat message info", e);
         }
     }
 

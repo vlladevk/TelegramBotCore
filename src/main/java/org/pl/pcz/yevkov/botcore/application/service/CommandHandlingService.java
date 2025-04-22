@@ -21,10 +21,7 @@ public class CommandHandlingService {
     private final BotApiAdapter telegramBot;
 
     public void handleCommand(ChatMessageReceivedDto receivedMessage) throws BotApiException {
-        String text = receivedMessage.text();
-        if (text.startsWith("/")) {
-            Optional<TextResponse> message = dispatcher.dispatch(receivedMessage);
-            message.ifPresent(telegramBot::execute);
-        }
+        Optional<TextResponse> message = dispatcher.dispatch(receivedMessage);
+        message.ifPresent(telegramBot::execute);
     }
 }

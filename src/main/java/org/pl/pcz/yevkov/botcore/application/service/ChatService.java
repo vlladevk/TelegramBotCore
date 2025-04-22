@@ -39,7 +39,7 @@ public class ChatService {
         if (chat.isPresent()) {
             log.debug("Chat found: id={}", chatId);
         } else {
-            log.warn("Chat not found: id={}", chatId);
+            log.debug("Chat not found: id={}", chatId);
         }
         return chat.map(chatReadMapper::mapFrom);
     }

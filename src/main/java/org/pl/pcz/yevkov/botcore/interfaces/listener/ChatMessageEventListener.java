@@ -26,11 +26,11 @@ public class ChatMessageEventListener {
 
     @EventListener
     public void onTelegramUpdate(@NonNull ChatMessageReceivedEvent event) {
-        ChatMessageReceivedDto receivedMessage = event.member();
+        ChatMessageReceivedDto receivedMessage = event.message();
         try {
             userManagementService.ensureUserRegisteredInChat(receivedMessage);
-            commandHandlingService.handleCommand(receivedMessage);
-            tokenManagementService.handleNonCommandMessage(receivedMessage);
+            if (event.isCommand()) commandHandlingService.handleCommand(receivedMessage);
+            else tokenManagementService.handleNonCommandMessage(receivedMessage);
         } catch (BotApiException e) {
             log.error("Error processing message: {}", receivedMessage.text(), e);
         } catch (Exception e) {

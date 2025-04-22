@@ -6,7 +6,6 @@ import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMessageReceivedDto;
 import org.pl.pcz.yevkov.botcore.application.dto.user.UserCreateDto;
 import org.pl.pcz.yevkov.botcore.application.dto.userChat.UserChatCreateDto;
 import org.pl.pcz.yevkov.botcore.application.dto.userChat.UserChatReadDto;
-import org.pl.pcz.yevkov.botcore.domain.entity.ChatStatus;
 import org.pl.pcz.yevkov.botcore.domain.entity.ChatType;
 import org.pl.pcz.yevkov.botcore.domain.entity.UserRole;
 import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
@@ -33,7 +32,7 @@ public class UserManagementService {
         ChatId chatId = receivedMessage.chatId();
 
         var chatOptional = chatService.findChatById(chatId);
-        if (chatOptional.isEmpty() || chatOptional.get().chatStatus() != ChatStatus.ACTIVE) return;
+        if (chatOptional.isEmpty()) return;
 
         var userOptional = userService.findUserById(userId);
         if (userOptional.isEmpty()) {
