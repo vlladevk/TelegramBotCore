@@ -26,7 +26,7 @@ public class BotEventDispatcher {
     private final List<UpdateToEventDtoMapper<Update, ? extends EventDto>> dtoMappers;
     private final EventInstanceFactory eventInstanceFactory;
 
-    public   List<BotEvent> dispatch(@NonNull Update update) {
+    public List<BotEvent> dispatch(@NonNull Update update) {
         ArrayList<BotEvent> events = new ArrayList<>();
         dispatchEvents(update, events);
         logDispatchResult(update, events);
@@ -34,7 +34,7 @@ public class BotEventDispatcher {
     }
 
 
-    private void dispatchEvents(@NonNull Update update, @NonNull List<BotEvent> events) {
+    private void dispatchEvents(Update update, List<BotEvent> events) {
         for (var mapper : dtoMappers) {
             log.debug("Trying bulk event mapper: {}", mapper.getClass().getSimpleName());
 
@@ -46,7 +46,7 @@ public class BotEventDispatcher {
     }
 
 
-    private void processEventDto(@NonNull EventDto dto, @NonNull List<BotEvent> events) {
+    private void processEventDto(EventDto dto, List<BotEvent> events) {
         var maybeEvent = eventInstanceFactory.createEventInstance(dto);
         if (maybeEvent.isPresent()) {
             var event = maybeEvent.get();
@@ -58,7 +58,7 @@ public class BotEventDispatcher {
     }
 
 
-    private void logDispatchResult(@NonNull Update update, @NonNull List<BotEvent> events) {
+    private void logDispatchResult(Update update, List<BotEvent> events) {
         if (events.isEmpty()) {
             log.info("No event matched for update with ID: {}", update.getUpdateId());
         } else {
