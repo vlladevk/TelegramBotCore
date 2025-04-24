@@ -1,6 +1,7 @@
 package org.pl.pcz.yevkov.botcore.infrastructure.mapper.event;
 
 import lombok.NonNull;
+import org.pl.pcz.yevkov.botcore.domain.event.ChatMemberLeftEvent;
 import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
 import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMemberLeftDto;
 import org.pl.pcz.yevkov.botcore.domain.vo.UserId;
@@ -12,7 +13,7 @@ import java.util.List;
 
 
 @Component
-public class ChatMemberLeftDtoMapper implements UpdateToEventDtoMapper<Update, ChatMemberLeftDto> {
+public class ChatMemberLeftEventMapper implements UpdateToEventMapper<ChatMemberLeftEvent> {
 
     @Override
     public boolean supports(@NonNull Update update) {
@@ -20,12 +21,7 @@ public class ChatMemberLeftDtoMapper implements UpdateToEventDtoMapper<Update, C
                 && update.getMessage().getLeftChatMember() != null;
     }
 
-    @Override
-    public List<ChatMemberLeftDto> mapFrom(@NonNull Update update) {
-        if (!supports(update)) {
-            throw new IllegalStateException("Update is not a ChatMemberLeft event");
-        }
-
+    private List<ChatMemberLeftDto> mapToDto(Update update) {
         var message = update.getMessage();
         User user = message.getLeftChatMember();
 
@@ -35,5 +31,13 @@ public class ChatMemberLeftDtoMapper implements UpdateToEventDtoMapper<Update, C
                 .username(user.getUserName())
                 .firstName(user.getFirstName())
                 .build());
+    }
+
+    @Override
+    public List<ChatMemberLeftEvent> mapFrom(@NonNull Update update) {
+        if (!supports(update)) {
+            throw new IllegalStateException("Update is not a ChatMemberLeft event");
+        }
+        return mapToDto(update).stream().map(ChatMemberLeftEvent::new).toList();
     }
 }

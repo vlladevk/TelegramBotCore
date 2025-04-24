@@ -1,6 +1,7 @@
 package org.pl.pcz.yevkov.botcore.infrastructure.mapper.event;
 
 import lombok.NonNull;
+import org.pl.pcz.yevkov.botcore.domain.event.ChatMemberJoinedEvent;
 import org.pl.pcz.yevkov.botcore.domain.vo.ChatId;
 import org.pl.pcz.yevkov.botcore.application.dto.event.ChatMemberJoinedDto;
 import org.pl.pcz.yevkov.botcore.domain.vo.UserId;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class ChatMemberJoinedMapperEvent implements UpdateToEventDtoMapper<Update, ChatMemberJoinedDto> {
+public class ChatMemberJoinedEventMapper implements UpdateToEventMapper<ChatMemberJoinedEvent> {
     @Override
     public boolean supports(@NonNull Update update) {
         return update.hasMessage()
@@ -20,12 +21,7 @@ public class ChatMemberJoinedMapperEvent implements UpdateToEventDtoMapper<Updat
                 && !update.getMessage().getNewChatMembers().isEmpty();
     }
 
-    @Override
-    public List<ChatMemberJoinedDto> mapFrom(@NonNull Update update) {
-        if (!supports(update)) {
-            throw new IllegalStateException("Update is not a ChatMemberJoined event");
-        }
-
+    private List<ChatMemberJoinedDto> mapToDto(Update update) {
         Long chatId_long = update.getMessage().getChatId();
         ChatId chatId = new ChatId(chatId_long);
         String chatTitle = update.getMessage().getChat().getTitle();
@@ -41,4 +37,13 @@ public class ChatMemberJoinedMapperEvent implements UpdateToEventDtoMapper<Updat
                 )
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ChatMemberJoinedEvent> mapFrom(@NonNull Update update) {
+        if (!supports(update)) {
+            throw new IllegalStateException("Update is not a ChatMemberJoined event");
+        }
+        return mapToDto(update).stream().map(ChatMemberJoinedEvent::new).toList();
+    }
+
 }
