@@ -33,6 +33,7 @@ public class BotCommandBeanPostProcessor implements BeanPostProcessor {
             for (var method : ReflectionUtils.getDeclaredMethods(originalClass)) {
                 if (method.isAnnotationPresent(BotCommand.class)) {
                     Method proxyMethod = AopUtils.getMostSpecificMethod(method, bean.getClass());
+                    proxyMethod.setAccessible(true);
                     commandScanner.getObject().registerCommand(bean, proxyMethod);
                 }
             }
