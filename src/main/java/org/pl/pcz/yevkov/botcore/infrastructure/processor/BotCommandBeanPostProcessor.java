@@ -32,12 +32,8 @@ public class BotCommandBeanPostProcessor implements BeanPostProcessor {
         if (originalClass.isAnnotationPresent(CommandController.class)) {
             for (var method : ReflectionUtils.getDeclaredMethods(originalClass)) {
                 if (method.isAnnotationPresent(BotCommand.class)) {
-                    try {
-                        Method proxyMethod = bean.getClass().getMethod(method.getName(), method.getParameterTypes());
-                        commandScanner.getObject().registerCommand(bean, proxyMethod);
-                    } catch (NoSuchMethodException e) {
-                        throw new IllegalStateException("Failed to find method " + method.getName(), e);
-                    }
+                    Method proxyMethod = AopUtils.getMostSpecificMethod(method, bean.getClass());
+                    commandScanner.getObject().registerCommand(bean, proxyMethod);
                 }
             }
         }
