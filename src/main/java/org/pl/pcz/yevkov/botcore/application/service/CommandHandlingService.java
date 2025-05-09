@@ -19,8 +19,10 @@ public class CommandHandlingService {
 
     private final CommandDispatcher dispatcher;
     private final BotApiAdapter telegramBot;
+    private final CommandTargetCheckerService commandTargetChecker;
 
     public void handleCommand(ChatMessageReceivedDto receivedMessage) throws BotApiException {
+        if (!commandTargetChecker.isForThisBot(receivedMessage.text())) return;
         Optional<TextResponse> message = dispatcher.dispatch(receivedMessage);
         message.ifPresent(telegramBot::execute);
     }
