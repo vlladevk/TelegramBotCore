@@ -4,5 +4,5 @@ import lombok.NonNull;
 
 
 public interface CommandExtractor {
-    String extract(@NonNull String text);
+    Command extract(@NonNull String text);
 }

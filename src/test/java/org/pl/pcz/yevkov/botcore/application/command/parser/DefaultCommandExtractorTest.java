@@ -27,7 +27,7 @@ class DefaultCommandExtractorTest {
     @ParameterizedTest
     @MethodSource("provideTestArguments")
     void extract_testCommandExtraction_returnCommand(String input, String expectedResult) {
-        String result = extractor.extract(input);
-        assertEquals(expectedResult, result);
+        Command result = extractor.extract(input);
+        assertEquals(expectedResult, result.text());
     }
 }

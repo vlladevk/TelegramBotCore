@@ -11,6 +11,7 @@ import org.pl.pcz.yevkov.botcore.application.command.access.CommandPermissionChe
 import org.pl.pcz.yevkov.botcore.application.command.error.CommandErrorHandler;
 import org.pl.pcz.yevkov.botcore.application.command.exception.CommandExecutionException;
 import org.pl.pcz.yevkov.botcore.application.command.executor.CommandExecutor;
+import org.pl.pcz.yevkov.botcore.application.command.parser.Command;
 import org.pl.pcz.yevkov.botcore.application.command.parser.CommandExtractor;
 import org.pl.pcz.yevkov.botcore.application.command.registry.BotCommandProvider;
 import org.pl.pcz.yevkov.botcore.application.command.registry.RegisteredCommand;
@@ -87,7 +88,7 @@ class CommandDispatcherTest {
         @Test
         void dispatch_unknownCommand_returnsUnknownCommandError() {
             ChatMessageReceivedDto m = msg("/oops");
-            when(extractor.extract("/oops")).thenReturn("oops");
+            when(extractor.extract("/oops")).thenReturn(new Command("oops", true));
             when(provider.getRegisteredCommand("oops")).thenReturn(Optional.empty());
             when(error.handleUnknownCommand(m, "oops")).thenReturn(ok);
 
@@ -137,7 +138,7 @@ class CommandDispatcherTest {
         }
 
         private void givenCommon(ChatMessageReceivedDto m, RegisteredCommand cmd) {
-            when(extractor.extract(m.text())).thenReturn("test");
+            when(extractor.extract(m.text())).thenReturn(new Command("test", false));
             when(provider.getRegisteredCommand("test")).thenReturn(Optional.of(cmd));
         }
     }
@@ -149,7 +150,7 @@ class CommandDispatcherTest {
             ChatMessageReceivedDto m = msg("/test");
             RegisteredCommand cmd = rc();
 
-            when(extractor.extract("/test")).thenReturn("test");
+            when(extractor.extract("/test")).thenReturn(new Command("test", false));
             when(provider.getRegisteredCommand("test")).thenReturn(Optional.of(cmd));
             when(permission.hasAccess(m, cmd)).thenReturn(new CommandAccessResult(true, "role"));
 
@@ -168,7 +169,7 @@ class CommandDispatcherTest {
             ChatMessageReceivedDto m = msg("/test");
             RegisteredCommand cmd = rc();
 
-            when(extractor.extract("/test")).thenReturn("test");
+            when(extractor.extract("/test")).thenReturn(new Command("test", false));
             when(provider.getRegisteredCommand("test")).thenReturn(Optional.of(cmd));
             when(permission.hasAccess(m, cmd)).thenReturn(new CommandAccessResult(true, "role"));
 

@@ -8,6 +8,7 @@ import org.pl.pcz.yevkov.botcore.application.command.access.CommandPermissionChe
 import org.pl.pcz.yevkov.botcore.application.command.error.CommandErrorHandler;
 import org.pl.pcz.yevkov.botcore.application.command.exception.CommandExecutionException;
 import org.pl.pcz.yevkov.botcore.application.command.executor.CommandExecutor;
+import org.pl.pcz.yevkov.botcore.application.command.parser.Command;
 import org.pl.pcz.yevkov.botcore.application.command.parser.CommandExtractor;
 import org.pl.pcz.yevkov.botcore.application.command.registry.BotCommandProvider;
 import org.pl.pcz.yevkov.botcore.application.command.registry.RegisteredCommand;
@@ -36,22 +37,26 @@ public class CommandDispatcher {
             return Optional.of(commandErrorHandler.handleEmptyMessage(message));
         }
 
-        String command = commandExtractor.extract(message.text());
+        Command command = commandExtractor.extract(message.text());
+
         log.debug("Received command: '{}'", command);
 
-        Optional<RegisteredCommand> commandOpt = botCommandProvider.getRegisteredCommand(command);
+        Optional<RegisteredCommand> commandOpt = botCommandProvider.getRegisteredCommand(command.text());
         if (commandOpt.isEmpty()) {
             publisher.publishEvent(new UnrecognizedCommandEvent(message));
-            return Optional.of(commandErrorHandler.handleUnknownCommand(message, command));
+            if (command.isExplicitCommand()) {
+                return Optional.of(commandErrorHandler.handleUnknownCommand(message, command.text()));
+            }
+            return Optional.empty();
         }
 
         RegisteredCommand registeredCommand = commandOpt.get();
         CommandAccessResult access = commandPermissionChecker.hasAccess(message, registeredCommand);
         if (!access.allowed()) {
-            return Optional.of(commandErrorHandler.handleAccessDenied(message, access, command));
+            return Optional.of(commandErrorHandler.handleAccessDenied(message, access, command.text()));
         }
 
-        return executeCommand(message, command, registeredCommand);
+        return executeCommand(message, command.text(), registeredCommand);
     }
 
 
